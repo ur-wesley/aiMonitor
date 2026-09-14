@@ -1,4 +1,4 @@
-namespace UsageTray.Configuration;
+namespace aiMonitor.Configuration;
 
 public sealed class AppSettings
 {

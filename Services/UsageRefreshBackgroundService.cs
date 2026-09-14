@@ -1,10 +1,10 @@
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using UsageTray.Configuration;
-using UsageTray.Models;
+using aiMonitor.Configuration;
+using aiMonitor.Models;
 
-namespace UsageTray.Services;
+namespace aiMonitor.Services;
 
 public sealed class UsageRefreshBackgroundService(
     IEnumerable<IUsageProvider> providers,

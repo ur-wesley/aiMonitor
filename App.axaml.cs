@@ -5,9 +5,9 @@ using Avalonia.Controls.Platform;
 using Avalonia.Markup.Xaml;
 using Avalonia.Platform;
 using Microsoft.Extensions.DependencyInjection;
-using UsageTray.ViewModels;
+using aiMonitor.ViewModels;
 
-namespace UsageTray;
+namespace aiMonitor;
 
 public partial class App : Application
 {
@@ -73,7 +73,7 @@ public partial class App : Application
 
     private static WindowIcon LoadIcon()
     {
-        var uri = new Uri("avares://UsageTray/Assets/app.ico");
+        var uri = new Uri("avares://aiMonitor/Assets/app.ico");
         using var stream = AssetLoader.Open(uri);
         return new WindowIcon(stream);
     }

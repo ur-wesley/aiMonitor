@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace UsageTray.Models;
+namespace aiMonitor.Models;
 
 public sealed class YasbExportDto
 {

@@ -1,5 +1,5 @@
 # Copy these blocks into %USERPROFILE%\.config\yasb\config.yaml
-# Requires UsageTray running (tray app) for the localhost API.
+# Requires aiMonitor running (tray app) for the localhost API.
 
 widgets:
   ai_usage:
@@ -22,7 +22,7 @@ widgets:
         use_shell: false
       callbacks:
         on_left: "toggle_label"
-        on_right: "exec start \"\" \"UsageTray.exe\""
+        on_right: "exec start \"\" \"C:\\Arbeit\\aiMonitor\\bin\\Release\\net10.0\\win-x64\\publish\\aiMonitor.exe\""
 
   ai_usage_cursor:
     type: "yasb.custom.CustomWidget"

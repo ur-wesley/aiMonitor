@@ -2,9 +2,9 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Interactivity;
-using UsageTray.ViewModels;
+using aiMonitor.ViewModels;
 
-namespace UsageTray.Views;
+namespace aiMonitor.Views;
 
 public partial class UsageWindow : Window
 {

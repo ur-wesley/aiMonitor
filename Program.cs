@@ -1,7 +1,7 @@
 ﻿using Avalonia;
-using UsageTray.Hosting;
+using aiMonitor.Hosting;
 
-namespace UsageTray;
+namespace aiMonitor;
 
 internal static class Program
 {

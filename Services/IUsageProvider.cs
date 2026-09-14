@@ -1,6 +1,6 @@
-using UsageTray.Models;
+using aiMonitor.Models;
 
-namespace UsageTray.Services;
+namespace aiMonitor.Services;
 
 public interface IUsageProvider
 {

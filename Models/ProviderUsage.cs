@@ -1,4 +1,4 @@
-namespace UsageTray.Models;
+namespace aiMonitor.Models;
 
 public sealed record ProviderUsage(
     string ProviderId,

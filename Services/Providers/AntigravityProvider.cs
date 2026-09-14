@@ -1,11 +1,11 @@
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
-using UsageTray.Models;
-using UsageTray.Models.ExternalApi;
-using UsageTray.Services.Auth;
+using aiMonitor.Models;
+using aiMonitor.Models.ExternalApi;
+using aiMonitor.Services.Auth;
 
-namespace UsageTray.Services.Providers;
+namespace aiMonitor.Services.Providers;
 
 public sealed class AntigravityProvider(
     IHttpClientFactory httpClientFactory,

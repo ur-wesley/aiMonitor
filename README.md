@@ -1,4 +1,4 @@
-# UsageTray
+# aiMonitor
 
 Small Windows system-tray app that shows AI coding subscription usage for **Cursor**, **OpenCode Go**, and **Antigravity**.
 
@@ -9,18 +9,27 @@ Also exposes a localhost JSON API for [YASB](https://github.com/amnweb/yasb) cus
 - Windows 10/11
 - [.NET 10 SDK](https://dotnet.microsoft.com/download) for building
 
+## Install location
+
+Clone or copy this repo to:
+
+```
+C:\Arbeit\aiMonitor
+```
+
 ## Build
 
 ```powershell
+cd C:\Arbeit\aiMonitor
 dotnet publish -c Release -r win-x64 --self-contained -p:PublishReadyToRun=true
 ```
 
-Output: `bin/Release/net10.0/win-x64/publish/UsageTray.exe`
+Output: `C:\Arbeit\aiMonitor\bin\Release\net10.0\win-x64\publish\aiMonitor.exe`
 
 ## Run
 
 ```powershell
-UsageTray.exe
+C:\Arbeit\aiMonitor\bin\Release\net10.0\win-x64\publish\aiMonitor.exe
 ```
 
 The app lives in the system tray. Left-click the icon to open the usage popup.
@@ -28,7 +37,7 @@ The app lives in the system tray. Left-click the icon to open the usage popup.
 ### CLI export (YASB fallback)
 
 ```powershell
-UsageTray.exe export --format json
+aiMonitor.exe export --format json
 ```
 
 Prints the same JSON as `GET http://127.0.0.1:6736/api/v1/usage`.
@@ -52,4 +61,4 @@ See [integrations/yasb/README.md](integrations/yasb/README.md).
 - `http://127.0.0.1:6736/api/v1/usage` — full usage JSON
 - Bound to localhost only; no tokens exposed
 
-Settings are stored in `%APPDATA%\UsageTray\settings.json` (OpenCode key encrypted with DPAPI).
+Settings are stored in `%APPDATA%\aiMonitor\settings.json` (OpenCode key encrypted with DPAPI).

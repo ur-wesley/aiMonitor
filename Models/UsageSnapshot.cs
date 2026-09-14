@@ -1,4 +1,4 @@
-namespace UsageTray.Models;
+namespace aiMonitor.Models;
 
 public sealed record UsageSnapshot(
     IReadOnlyList<ProviderUsage> Providers,

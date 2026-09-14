@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace UsageTray.Models.ExternalApi;
+namespace aiMonitor.Models.ExternalApi;
 
 public sealed class AntigravityQuotaResponse
 {

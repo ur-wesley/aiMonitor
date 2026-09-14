@@ -6,8 +6,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <LangVersion>latest</LangVersion>
     <ApplicationManifest>app.manifest</ApplicationManifest>
-    <RootNamespace>UsageTray</RootNamespace>
-    <AssemblyName>UsageTray</AssemblyName>
+    <RootNamespace>aiMonitor</RootNamespace>
+    <AssemblyName>aiMonitor</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>

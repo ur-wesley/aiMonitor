@@ -2,12 +2,12 @@ using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using Microsoft.Extensions.Options;
-using UsageTray.Configuration;
-using UsageTray.Models;
-using UsageTray.Models.ExternalApi;
-using UsageTray.Services.Auth;
+using aiMonitor.Configuration;
+using aiMonitor.Models;
+using aiMonitor.Models.ExternalApi;
+using aiMonitor.Services.Auth;
 
-namespace UsageTray.Services.Providers;
+namespace aiMonitor.Services.Providers;
 
 public sealed partial class CursorProvider(
     IHttpClientFactory httpClientFactory,

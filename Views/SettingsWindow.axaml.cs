@@ -1,6 +1,6 @@
 using Avalonia.Controls;
 
-namespace UsageTray.Views;
+namespace aiMonitor.Views;
 
 public partial class SettingsWindow : Window
 {

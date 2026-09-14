@@ -1,10 +1,10 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using UsageTray.Models;
-using UsageTray.Services;
+using aiMonitor.Models;
+using aiMonitor.Services;
 
-namespace UsageTray.ViewModels;
+namespace aiMonitor.ViewModels;
 
 public partial class UsageViewModel : ObservableObject
 {

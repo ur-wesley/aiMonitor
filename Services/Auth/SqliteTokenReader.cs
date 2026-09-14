@@ -1,6 +1,6 @@
 using Microsoft.Data.Sqlite;
 
-namespace UsageTray.Services.Auth;
+namespace aiMonitor.Services.Auth;
 
 public static class SqliteTokenReader
 {

@@ -1,14 +1,14 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
-using UsageTray.Configuration;
-using UsageTray.Hosting;
-using UsageTray.Services;
-using UsageTray.Services.Auth;
-using UsageTray.Services.Providers;
-using UsageTray.ViewModels;
+using aiMonitor.Configuration;
+using aiMonitor.Hosting;
+using aiMonitor.Services;
+using aiMonitor.Services.Auth;
+using aiMonitor.Services.Providers;
+using aiMonitor.ViewModels;
 
-namespace UsageTray;
+namespace aiMonitor;
 
 public static class AppHost
 {

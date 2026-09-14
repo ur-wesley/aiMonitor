@@ -1,9 +1,9 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:vm="using:UsageTray.ViewModels"
-        x:Class="UsageTray.Views.SettingsWindow"
+        xmlns:vm="using:aiMonitor.ViewModels"
+        x:Class="aiMonitor.Views.SettingsWindow"
         x:DataType="vm:SettingsViewModel"
-        Title="UsageTray Settings"
+        Title="aiMonitor Settings"
         Width="480"
         Height="420"
         WindowStartupLocation="CenterScreen">

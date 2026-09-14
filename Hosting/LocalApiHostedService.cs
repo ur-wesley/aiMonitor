@@ -5,11 +5,11 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using UsageTray.Configuration;
-using UsageTray.Models;
-using UsageTray.Services;
+using aiMonitor.Configuration;
+using aiMonitor.Models;
+using aiMonitor.Services;
 
-namespace UsageTray.Hosting;
+namespace aiMonitor.Hosting;
 
 public sealed class LocalApiHostedService(
     IUsageStore store,

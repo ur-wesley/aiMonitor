@@ -1,8 +1,8 @@
 using System.Net.Http.Json;
 using System.Text.Json;
-using UsageTray.Models.ExternalApi;
+using aiMonitor.Models.ExternalApi;
 
-namespace UsageTray.Services.Auth;
+namespace aiMonitor.Services.Auth;
 
 public sealed class OAuthTokenRefresher(IHttpClientFactory httpClientFactory)
 {

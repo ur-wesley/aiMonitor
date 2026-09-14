@@ -1,7 +1,7 @@
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace UsageTray.Services.Auth;
+namespace aiMonitor.Services.Auth;
 
 public static class WindowsCredentialReader
 {

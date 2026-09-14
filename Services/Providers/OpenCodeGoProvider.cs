@@ -2,11 +2,11 @@ using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using Microsoft.Extensions.Options;
-using UsageTray.Configuration;
-using UsageTray.Models;
-using UsageTray.Models.ExternalApi;
+using aiMonitor.Configuration;
+using aiMonitor.Models;
+using aiMonitor.Models.ExternalApi;
 
-namespace UsageTray.Services.Providers;
+namespace aiMonitor.Services.Providers;
 
 public sealed class OpenCodeGoProvider(
     IHttpClientFactory httpClientFactory,

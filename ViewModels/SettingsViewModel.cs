@@ -1,8 +1,8 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using UsageTray.Configuration;
+using aiMonitor.Configuration;
 
-namespace UsageTray.ViewModels;
+namespace aiMonitor.ViewModels;
 
 public partial class SettingsViewModel : ObservableObject
 {
@@ -55,6 +55,6 @@ public partial class SettingsViewModel : ObservableObject
         };
 
         _settingsStore.Save(settings);
-        StatusMessage = "Saved. Restart UsageTray for API port changes.";
+        StatusMessage = "Saved. Restart aiMonitor for API port changes.";
     }
 }

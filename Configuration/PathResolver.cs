@@ -1,4 +1,4 @@
-namespace UsageTray.Configuration;
+namespace aiMonitor.Configuration;
 
 public static class PathResolver
 {
@@ -51,6 +51,6 @@ public static class PathResolver
     public static string SettingsFilePath()
     {
         var appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-        return Path.Combine(appData, "UsageTray", "settings.json");
+        return Path.Combine(appData, "aiMonitor", "settings.json");
     }
 }

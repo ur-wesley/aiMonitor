@@ -4,10 +4,10 @@ using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using UsageTray.Services;
-using UsageTray.Views;
+using aiMonitor.Services;
+using aiMonitor.Views;
 
-namespace UsageTray.ViewModels;
+namespace aiMonitor.ViewModels;
 
 public partial class ApplicationViewModel : ObservableObject
 {

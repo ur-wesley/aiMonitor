@@ -1,10 +1,10 @@
 # YASB integration
 
-UsageTray exposes a localhost JSON API for [YASB](https://github.com/amnweb/yasb) custom widgets.
+aiMonitor exposes a localhost JSON API for [YASB](https://github.com/amnweb/yasb) custom widgets.
 
 ## Setup
 
-1. Build or download `UsageTray.exe` and keep it running in the system tray.
+1. Build `C:\Arbeit\aiMonitor\bin\Release\net10.0\win-x64\publish\aiMonitor.exe` and keep it running in the system tray.
 2. Confirm the API responds:
    ```powershell
    curl.exe -s http://127.0.0.1:6736/api/v1/usage
@@ -19,7 +19,7 @@ Use the CLI export mode as `run_cmd` instead:
 
 ```yaml
 exec_options:
-  run_cmd: "UsageTray.exe export --format json"
+  run_cmd: "aiMonitor.exe export --format json"
   run_interval: 300000
   return_format: "json"
 ```
@@ -36,4 +36,4 @@ This fetches all providers on every poll and is slower than the localhost API.
 | `GET /api/v1/usage/antigravity` | Antigravity provider only |
 | `GET /health` | Health check |
 
-Default port: `6736` (change in UsageTray Settings).
+Default port: `6736` (change in aiMonitor Settings).
