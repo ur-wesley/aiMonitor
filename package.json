@@ -1,0 +1,11 @@
+{
+  "name": "aimonitor",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "release": "bumpp"
+  },
+  "devDependencies": {
+    "bumpp": "^12.3.0"
+  }
+}
