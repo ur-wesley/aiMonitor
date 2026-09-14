@@ -1,6 +1,7 @@
 bin/
 obj/
 .vs/
+agent-tools/
 *.user
 *.suo
 .DS_Store
