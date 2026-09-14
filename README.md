@@ -4,18 +4,51 @@ Small Windows system-tray app that shows AI coding subscription usage for **Curs
 
 Also exposes a localhost JSON API for [YASB](https://github.com/amnweb/yasb) custom widgets.
 
+**Repository:** [cursor.com/codebase/ur-wesley/aiMonitor](https://cursor.com/codebase/ur-wesley/aiMonitor) (private — change visibility in repo settings)
+
 ## Requirements
 
 - Windows 10/11
+- WSL (for cloning — Origin CLI is not available in PowerShell)
 - [.NET 10 SDK](https://dotnet.microsoft.com/download) for building
 
-## Install location
+## Quick setup (clone to `C:\Arbeit\aiMonitor`)
 
-Clone or copy this repo to:
+### Option A — one command from PowerShell (after you have the repo once)
 
+If you already have this folder, run:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\setup-windows.ps1
 ```
-C:\Arbeit\aiMonitor
+
+### Option B — WSL terminal (recommended first time)
+
+```bash
+# Install the Origin CLI
+curl -fsSL https://downloads.cursor.com/origin/install.sh | sh
+
+# Sign in (also sets up git credentials)
+origin auth login
+
+# Clone the repository to C:\Arbeit\aiMonitor
+origin repo clone ur-wesley/aiMonitor /mnt/c/Arbeit/aiMonitor
 ```
+
+If `origin` is not found after install:
+
+```bash
+echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
+source ~/.bashrc
+```
+
+Or run the bundled script:
+
+```bash
+bash /mnt/c/Arbeit/aiMonitor/scripts/setup-wsl.sh
+```
+
+Origin CLI docs: https://cursor.com/docs/origin/cli
 
 ## Build
 
