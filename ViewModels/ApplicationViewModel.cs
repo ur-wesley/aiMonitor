@@ -4,6 +4,7 @@ using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using aiMonitor.Platform;
 using aiMonitor.Services;
 using aiMonitor.Views;
 
@@ -48,9 +49,11 @@ public partial class ApplicationViewModel : ObservableObject
         }
 
         _usageWindow ??= new UsageWindow { DataContext = _usageViewModel };
-        PositionNearTray(_usageWindow);
+        _usageWindow.PrepareToShow();
         _usageWindow.Show();
+        WindowPlacement.PositionNearCursor(_usageWindow);
         _usageWindow.Activate();
+        _usageWindow.EnableHideOnDeactivate();
     }
 
     private void OpenSettings()
@@ -82,18 +85,4 @@ public partial class ApplicationViewModel : ObservableObject
                 : "AI Usage";
     }
 
-    private static void PositionNearTray(Window window)
-    {
-        if (Application.Current?.ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime desktop)
-            return;
-
-        var screen = desktop.MainWindow?.Screens.Primary ?? window.Screens.Primary;
-        if (screen is null)
-            return;
-
-        var workArea = screen.WorkingArea;
-        window.Position = new PixelPoint(
-            workArea.X + workArea.Width - (int)window.Width - 8,
-            workArea.Y + workArea.Height - (int)window.Height - 48);
-    }
 }

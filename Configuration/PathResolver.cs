@@ -26,6 +26,12 @@ public static class PathResolver
         return Path.Combine(profile, ".gemini", "antigravity-cli", "antigravity-oauth-token");
     }
 
+    public static string GeminiOAuthCredsFile()
+    {
+        var profile = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+        return Path.Combine(profile, ".gemini", "oauth_creds.json");
+    }
+
     public static IEnumerable<string> AntigravityStateDbCandidates(AppSettings settings)
     {
         if (!string.IsNullOrWhiteSpace(settings.AntigravityStateDbPath))

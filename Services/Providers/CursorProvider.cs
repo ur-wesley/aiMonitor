@@ -65,7 +65,7 @@ public sealed partial class CursorProvider(
         }
 
         DateTimeOffset? reset = null;
-        if (DateTimeOffset.TryParse(body.IndividualUsage?.BillingCycleEnd, out var resetAt))
+        if (DateTimeOffset.TryParse(body.BillingCycleEnd, out var resetAt))
             reset = resetAt;
 
         var windows = new List<UsageWindowMetric>();

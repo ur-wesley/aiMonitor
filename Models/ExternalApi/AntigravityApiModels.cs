@@ -4,14 +4,29 @@ namespace aiMonitor.Models.ExternalApi;
 
 public sealed class AntigravityQuotaResponse
 {
+    [JsonPropertyName("groups")]
+    public List<AntigravityQuotaGroup>? Groups { get; set; }
+
     [JsonPropertyName("quotaGroups")]
     public List<AntigravityQuotaGroup>? QuotaGroups { get; set; }
 
     [JsonPropertyName("quota_groups")]
     public List<AntigravityQuotaGroup>? QuotaGroupsSnake { get; set; }
 
-    public IEnumerable<AntigravityQuotaGroup> Groups =>
-        QuotaGroups ?? QuotaGroupsSnake ?? [];
+    public IEnumerable<AntigravityQuotaGroup> AllGroups =>
+        Groups ?? QuotaGroups ?? QuotaGroupsSnake ?? [];
+}
+
+public sealed class LoadCodeAssistResponse
+{
+    [JsonPropertyName("cloudaicompanionProject")]
+    public string? CloudAiCompanionProject { get; set; }
+}
+
+public sealed class AntigravityAuthStatus
+{
+    [JsonPropertyName("apiKey")]
+    public string? ApiKey { get; set; }
 }
 
 public sealed class AntigravityQuotaGroup
@@ -22,6 +37,9 @@ public sealed class AntigravityQuotaGroup
     [JsonPropertyName("display_name")]
     public string? DisplayNameSnake { get; set; }
 
+    [JsonPropertyName("buckets")]
+    public List<AntigravityQuotaBucket>? Buckets { get; set; }
+
     [JsonPropertyName("quotaBuckets")]
     public List<AntigravityQuotaBucket>? QuotaBuckets { get; set; }
 
@@ -30,8 +48,8 @@ public sealed class AntigravityQuotaGroup
 
     public string Name => DisplayName ?? DisplayNameSnake ?? "Unknown";
 
-    public IEnumerable<AntigravityQuotaBucket> Buckets =>
-        QuotaBuckets ?? QuotaBucketsSnake ?? [];
+    public IEnumerable<AntigravityQuotaBucket> AllBuckets =>
+        Buckets ?? QuotaBuckets ?? QuotaBucketsSnake ?? [];
 }
 
 public sealed class AntigravityQuotaBucket
@@ -84,4 +102,25 @@ public sealed class StoredOAuthToken
 
     [JsonPropertyName("expires_at")]
     public long? ExpiresAt { get; set; }
+
+    [JsonPropertyName("expiry_date")]
+    public long? ExpiryDate { get; set; }
+
+    [JsonPropertyName("token")]
+    public StoredOAuthToken? Token { get; set; }
+
+    public StoredOAuthToken Normalize()
+    {
+        if (Token is null)
+            return this;
+
+        return new StoredOAuthToken
+        {
+            AccessToken = Token.AccessToken ?? AccessToken,
+            RefreshToken = Token.RefreshToken ?? RefreshToken,
+            Expiry = Token.Expiry ?? Expiry,
+            ExpiresAt = Token.ExpiresAt ?? ExpiresAt,
+            ExpiryDate = Token.ExpiryDate ?? ExpiryDate,
+        };
+    }
 }

@@ -9,9 +9,11 @@ aiMonitor exposes a localhost JSON API for [YASB](https://github.com/amnweb/yasb
    ```powershell
    curl.exe -s http://127.0.0.1:6736/api/v1/usage
    ```
-3. Copy widget blocks from [`config-snippet.yaml`](config-snippet.yaml) into `%USERPROFILE%\.config\yasb\config.yaml`.
-4. Add `ai_usage` (or per-provider widgets) to a bar's `widgets` list.
-5. Optional: append rules from [`styles.css`](styles.css) to your YASB `styles.css`.
+3. Copy the `ai_usage` widget from [`config-snippet.yaml`](config-snippet.yaml) into `%USERPROFILE%\.config\yasb\config.yaml`.
+4. Add `ai_usage` to a bar's `widgets` list (e.g. `lwm-left` → `right` before `pomodoro`).
+5. Append rules from [`styles.css`](styles.css) to your YASB `styles.css`.
+
+The widget uses `fetch-usage.cmd` (same pattern as leopardwm `.cmd` helpers) so YASB gets clean JSON. Labels use `{data[cursor][total]}` field paths — not `{data[label]}`. Left-click toggles compact/detailed view; right-click opens aiMonitor.
 
 ## Without the tray app
 

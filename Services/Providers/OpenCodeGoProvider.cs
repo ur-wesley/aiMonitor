@@ -76,22 +76,77 @@ public sealed class OpenCodeGoProvider(
 
                 foreach (var key in new[] { "opencode-go", "opencode_go", "OpenCode Go", "go" })
                 {
-                    var value = node[key]?.GetValue<string>();
-                    if (!string.IsNullOrWhiteSpace(value))
-                        return value;
+                    var apiKey = ExtractApiKey(node[key]);
+                    if (!string.IsNullOrWhiteSpace(apiKey))
+                        return apiKey;
                 }
 
-                foreach (var property in node.AsObject())
-                {
-                    var value = property.Value?.GetValue<string>();
-                    if (!string.IsNullOrWhiteSpace(value) && value.StartsWith("sk-", StringComparison.Ordinal))
-                        return value;
-                }
+                var skKey = FindSkKey(node);
+                if (!string.IsNullOrWhiteSpace(skKey))
+                    return skKey;
             }
             catch
             {
                 // try next path
             }
+        }
+
+        return null;
+    }
+
+    private static string? ExtractApiKey(JsonNode? node)
+    {
+        if (node is null)
+            return null;
+
+        if (node is JsonValue value)
+        {
+            var text = value.GetValue<string>();
+            return string.IsNullOrWhiteSpace(text) ? null : text;
+        }
+
+        if (node is not JsonObject obj)
+            return null;
+
+        foreach (var propertyName in new[] { "key", "apiKey", "api_key" })
+        {
+            var direct = obj[propertyName]?.GetValue<string>();
+            if (!string.IsNullOrWhiteSpace(direct))
+                return direct;
+        }
+
+        foreach (var property in obj)
+        {
+            var nested = ExtractApiKey(property.Value);
+            if (!string.IsNullOrWhiteSpace(nested))
+                return nested;
+        }
+
+        return null;
+    }
+
+    private static string? FindSkKey(JsonNode? node)
+    {
+        if (node is null)
+            return null;
+
+        if (node is JsonValue value)
+        {
+            var text = value.GetValue<string>();
+            if (!string.IsNullOrWhiteSpace(text) && text.StartsWith("sk-", StringComparison.Ordinal))
+                return text;
+
+            return null;
+        }
+
+        if (node is not JsonObject obj)
+            return null;
+
+        foreach (var property in obj)
+        {
+            var found = FindSkKey(property.Value);
+            if (!string.IsNullOrWhiteSpace(found))
+                return found;
         }
 
         return null;

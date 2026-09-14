@@ -2,6 +2,7 @@ bin/
 obj/
 .vs/
 agent-tools/
+graphify-out/
 *.user
 *.suo
 .DS_Store

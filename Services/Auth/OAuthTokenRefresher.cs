@@ -1,5 +1,6 @@
 using System.Net.Http.Json;
 using System.Text.Json;
+using aiMonitor.Configuration;
 using aiMonitor.Models.ExternalApi;
 
 namespace aiMonitor.Services.Auth;
@@ -12,23 +13,38 @@ public sealed class OAuthTokenRefresher(IHttpClientFactory httpClientFactory)
 
     public async Task<string?> ResolveAccessTokenAsync(CancellationToken ct)
     {
-        var tokenJson = WindowsCredentialReader.ReadAntigravityToken();
-        if (string.IsNullOrWhiteSpace(tokenJson))
-            tokenJson = await ReadTokenFileAsync(ct).ConfigureAwait(false);
-
-        if (string.IsNullOrWhiteSpace(tokenJson))
-            return null;
-
-        StoredOAuthToken? stored;
-        try
+        var credential = WindowsCredentialReader.ReadAntigravityToken();
+        if (!string.IsNullOrWhiteSpace(credential))
         {
-            stored = JsonSerializer.Deserialize<StoredOAuthToken>(tokenJson);
-        }
-        catch
-        {
-            return tokenJson.StartsWith("ya29.", StringComparison.Ordinal) ? tokenJson : null;
+            var token = await ResolveFromJsonAsync(credential, ct).ConfigureAwait(false);
+            if (!string.IsNullOrWhiteSpace(token))
+                return token;
         }
 
+        foreach (var path in new[]
+        {
+            PathResolver.GeminiOAuthCredsFile(),
+            PathResolver.AntigravityOAuthTokenFile(),
+        })
+        {
+            if (!File.Exists(path))
+                continue;
+
+            var contents = await File.ReadAllTextAsync(path, ct).ConfigureAwait(false);
+            if (string.IsNullOrWhiteSpace(contents))
+                continue;
+
+            var token = await ResolveFromJsonAsync(contents, ct).ConfigureAwait(false);
+            if (!string.IsNullOrWhiteSpace(token))
+                return token;
+        }
+
+        return await ReadVscdbApiKeyAsync(ct).ConfigureAwait(false);
+    }
+
+    private async Task<string?> ResolveFromJsonAsync(string tokenJson, CancellationToken ct)
+    {
+        var stored = ParseStoredToken(tokenJson);
         if (stored is null)
             return null;
 
@@ -36,13 +52,30 @@ public sealed class OAuthTokenRefresher(IHttpClientFactory httpClientFactory)
             return stored.AccessToken;
 
         if (string.IsNullOrEmpty(stored.RefreshToken))
-            return stored.AccessToken;
+            return IsExpired(stored) ? null : stored.AccessToken;
 
         return await RefreshAsync(stored.RefreshToken, ct).ConfigureAwait(false);
     }
 
+    private static StoredOAuthToken? ParseStoredToken(string tokenJson)
+    {
+        try
+        {
+            return JsonSerializer.Deserialize<StoredOAuthToken>(tokenJson)?.Normalize();
+        }
+        catch
+        {
+            return tokenJson.StartsWith("ya29.", StringComparison.Ordinal)
+                ? new StoredOAuthToken { AccessToken = tokenJson }
+                : null;
+        }
+    }
+
     private static bool IsExpired(StoredOAuthToken token)
     {
+        if (token.ExpiryDate is long expiryMs && expiryMs > 0)
+            return DateTimeOffset.FromUnixTimeMilliseconds(expiryMs) <= DateTimeOffset.UtcNow.AddMinutes(2);
+
         if (token.ExpiresAt is long unix && unix > 0)
             return DateTimeOffset.FromUnixTimeSeconds(unix) <= DateTimeOffset.UtcNow.AddMinutes(2);
 
@@ -52,13 +85,20 @@ public sealed class OAuthTokenRefresher(IHttpClientFactory httpClientFactory)
         return false;
     }
 
-    private static async Task<string?> ReadTokenFileAsync(CancellationToken ct)
+    private static async Task<string?> ReadVscdbApiKeyAsync(CancellationToken ct)
     {
-        var path = Configuration.PathResolver.AntigravityOAuthTokenFile();
-        if (!File.Exists(path))
-            return null;
+        foreach (var dbPath in PathResolver.AntigravityStateDbCandidates(new AppSettings()))
+        {
+            var json = await SqliteTokenReader.ReadValueAsync(dbPath, "antigravityAuthStatus", ct).ConfigureAwait(false);
+            if (string.IsNullOrWhiteSpace(json))
+                continue;
 
-        return await File.ReadAllTextAsync(path, ct).ConfigureAwait(false);
+            var status = JsonSerializer.Deserialize<AntigravityAuthStatus>(json);
+            if (!string.IsNullOrWhiteSpace(status?.ApiKey))
+                return status.ApiKey;
+        }
+
+        return null;
     }
 
     private async Task<string?> RefreshAsync(string refreshToken, CancellationToken ct)

@@ -1,6 +1,7 @@
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
+using aiMonitor.Configuration;
 using aiMonitor.Models;
 using aiMonitor.Models.ExternalApi;
 using aiMonitor.Services.Auth;
@@ -11,10 +12,13 @@ public sealed class AntigravityProvider(
     IHttpClientFactory httpClientFactory,
     OAuthTokenRefresher tokenRefresher) : IUsageProvider
 {
-    private static readonly string[] QuotaUrls =
+    private const string UserAgent = "antigravity";
+
+    private static readonly string[] BaseUrls =
     [
-        "https://cloudcode-pa.googleapis.com/v1internal:retrieveUserQuotaSummary",
-        "https://daily-cloudcode-pa.googleapis.com/v1internal:retrieveUserQuotaSummary",
+        "https://daily-cloudcode-pa.googleapis.com",
+        "https://daily-cloudcode-pa.sandbox.googleapis.com",
+        "https://cloudcode-pa.googleapis.com",
     ];
 
     public string ProviderId => "antigravity";
@@ -28,16 +32,12 @@ public sealed class AntigravityProvider(
             return Failed("Not signed in to Antigravity");
 
         var client = httpClientFactory.CreateClient("antigravity");
+        var projectId = await LoadProjectIdAsync(client, token, ct).ConfigureAwait(false);
+
         AntigravityQuotaResponse? body = null;
-
-        foreach (var url in QuotaUrls)
+        foreach (var baseUrl in BaseUrls)
         {
-            using var request = new HttpRequestMessage(HttpMethod.Post, url)
-            {
-                Content = JsonContent.Create(new { }),
-            };
-            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
-
+            using var request = CreateQuotaRequest(baseUrl, token, projectId);
             using var response = await client.SendAsync(request, ct).ConfigureAwait(false);
             if (!response.IsSuccessStatusCode)
                 continue;
@@ -46,19 +46,19 @@ public sealed class AntigravityProvider(
             body = await JsonSerializer.DeserializeAsync<AntigravityQuotaResponse>(stream, cancellationToken: ct)
                 .ConfigureAwait(false);
 
-            if (body is not null && body.Groups.Any())
+            if (body is not null && body.AllGroups.Any())
                 break;
         }
 
-        if (body is null || !body.Groups.Any())
+        if (body is null || !body.AllGroups.Any())
             return Failed("Could not fetch Antigravity quota");
 
         var windows = new List<UsageWindowMetric>();
-        foreach (var group in body.Groups)
+        foreach (var group in body.AllGroups)
         {
             var isGemini = group.Name.Contains("gemini", StringComparison.OrdinalIgnoreCase);
             var prefix = isGemini ? "Gemini" : "Claude/GPT";
-            var buckets = group.Buckets.ToList();
+            var buckets = group.AllBuckets.ToList();
 
             if (buckets.Count >= 2)
             {
@@ -75,6 +75,47 @@ public sealed class AntigravityProvider(
             return Failed("No quota buckets in Antigravity response");
 
         return new ProviderUsage(ProviderId, DisplayName, windows, null, DateTimeOffset.UtcNow);
+    }
+
+    private static HttpRequestMessage CreateQuotaRequest(string baseUrl, string token, string? projectId)
+    {
+        var request = new HttpRequestMessage(HttpMethod.Post, $"{baseUrl}/v1internal:retrieveUserQuotaSummary")
+        {
+            Content = JsonContent.Create(
+                string.IsNullOrWhiteSpace(projectId)
+                    ? new Dictionary<string, string>()
+                    : new Dictionary<string, string> { ["project"] = projectId }),
+        };
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        request.Headers.TryAddWithoutValidation("User-Agent", UserAgent);
+        return request;
+    }
+
+    private static async Task<string?> LoadProjectIdAsync(HttpClient client, string token, CancellationToken ct)
+    {
+        var payload = new { metadata = new { ideType = "ANTIGRAVITY" } };
+
+        foreach (var baseUrl in BaseUrls)
+        {
+            using var request = new HttpRequestMessage(HttpMethod.Post, $"{baseUrl}/v1internal:loadCodeAssist")
+            {
+                Content = JsonContent.Create(payload),
+            };
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            request.Headers.TryAddWithoutValidation("User-Agent", UserAgent);
+
+            using var response = await client.SendAsync(request, ct).ConfigureAwait(false);
+            if (!response.IsSuccessStatusCode)
+                continue;
+
+            var body = await response.Content.ReadFromJsonAsync<LoadCodeAssistResponse>(cancellationToken: ct)
+                .ConfigureAwait(false);
+
+            if (!string.IsNullOrWhiteSpace(body?.CloudAiCompanionProject))
+                return body.CloudAiCompanionProject;
+        }
+
+        return null;
     }
 
     private static void AddRemaining(List<UsageWindowMetric> windows, string label, AntigravityQuotaBucket bucket)

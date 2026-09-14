@@ -21,6 +21,18 @@ public sealed class YasbExportDto
 
     [JsonPropertyName("fetched_at")]
     public string FetchedAt { get; set; } = string.Empty;
+
+    [JsonPropertyName("label")]
+    public string Label { get; set; } = "AI…";
+
+    [JsonPropertyName("label_alt")]
+    public string LabelAlt { get; set; } = string.Empty;
+
+    [JsonPropertyName("tooltip")]
+    public string Tooltip { get; set; } = string.Empty;
+
+    [JsonPropertyName("status_class")]
+    public string StatusClass { get; set; } = "ok";
 }
 
 public sealed class YasbCursorDto
@@ -33,6 +45,9 @@ public sealed class YasbCursorDto
 
     [JsonPropertyName("api")]
     public double? Api { get; set; }
+
+    [JsonPropertyName("resets_at")]
+    public string? ResetsAt { get; set; }
 
     [JsonPropertyName("error")]
     public string? Error { get; set; }

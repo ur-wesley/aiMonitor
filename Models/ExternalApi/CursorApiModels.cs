@@ -4,6 +4,12 @@ namespace aiMonitor.Models.ExternalApi;
 
 public sealed class CursorUsageSummaryResponse
 {
+    [JsonPropertyName("billingCycleStart")]
+    public string? BillingCycleStart { get; set; }
+
+    [JsonPropertyName("billingCycleEnd")]
+    public string? BillingCycleEnd { get; set; }
+
     [JsonPropertyName("individualUsage")]
     public CursorIndividualUsage? IndividualUsage { get; set; }
 
@@ -18,9 +24,6 @@ public sealed class CursorIndividualUsage
 {
     [JsonPropertyName("plan")]
     public CursorPlanUsage? Plan { get; set; }
-
-    [JsonPropertyName("billingCycleEnd")]
-    public string? BillingCycleEnd { get; set; }
 }
 
 public sealed class CursorPlanUsage
