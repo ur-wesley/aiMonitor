@@ -1,0 +1,73 @@
+# Copy these blocks into %USERPROFILE%\.config\yasb\config.yaml
+# Requires UsageTray running (tray app) for the localhost API.
+
+widgets:
+  ai_usage:
+    type: "yasb.custom.CustomWidget"
+    options:
+      label: "⟡ C:{data[cursor][total]}% G:{data[opencode_go][rolling]}% AG:{data[antigravity][gemini_5h]}%"
+      label_alt: "Cursor {data[cursor][total]}% · Go {data[opencode_go][weekly]}% · AG {data[antigravity][gemini_5h]}%"
+      label_placeholder: "Usage…"
+      class_name: "ai-usage-widget"
+      tooltip: true
+      tooltip_label: |
+        Cursor total: {data[cursor][total]}%
+        OpenCode Go 5h: {data[opencode_go][rolling]}%
+        Antigravity Gemini 5h: {data[antigravity][gemini_5h]}% left
+        Updated: {data[fetched_at]}
+      exec_options:
+        run_cmd: "curl.exe -s http://127.0.0.1:6736/api/v1/usage"
+        run_interval: 300000
+        return_format: "json"
+        use_shell: false
+      callbacks:
+        on_left: "toggle_label"
+        on_right: "exec start \"\" \"UsageTray.exe\""
+
+  ai_usage_cursor:
+    type: "yasb.custom.CustomWidget"
+    options:
+      label: "C {data[cursor][total]}%"
+      label_alt: "Auto {data[cursor][auto]}% API {data[cursor][api]}%"
+      class_name: "ai-usage-widget ai-usage-cursor"
+      exec_options:
+        run_cmd: "curl.exe -s http://127.0.0.1:6736/api/v1/usage/cursor"
+        run_interval: 300000
+        return_format: "json"
+        use_shell: false
+      callbacks:
+        on_left: "toggle_label"
+
+  ai_usage_opencode:
+    type: "yasb.custom.CustomWidget"
+    options:
+      label: "Go {data[opencode_go][rolling]}%"
+      label_alt: "W {data[opencode_go][weekly]}% M {data[opencode_go][monthly]}%"
+      class_name: "ai-usage-widget ai-usage-opencode"
+      exec_options:
+        run_cmd: "curl.exe -s http://127.0.0.1:6736/api/v1/usage"
+        run_interval: 300000
+        return_format: "json"
+        use_shell: false
+      callbacks:
+        on_left: "toggle_label"
+
+  ai_usage_antigravity:
+    type: "yasb.custom.CustomWidget"
+    options:
+      label: "AG {data[antigravity][gemini_5h]}%"
+      label_alt: "G5h {data[antigravity][gemini_5h]}% GW {data[antigravity][gemini_weekly]}%"
+      class_name: "ai-usage-widget ai-usage-antigravity"
+      exec_options:
+        run_cmd: "curl.exe -s http://127.0.0.1:6736/api/v1/usage"
+        run_interval: 300000
+        return_format: "json"
+        use_shell: false
+      callbacks:
+        on_left: "toggle_label"
+
+# Example bar placement:
+# bars:
+#   status-bar:
+#     widgets:
+#       right: ["ai_usage", "clock"]

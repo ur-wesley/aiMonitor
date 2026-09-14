@@ -1,0 +1,32 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:UsageTray.ViewModels"
+        x:Class="UsageTray.Views.SettingsWindow"
+        x:DataType="vm:SettingsViewModel"
+        Title="UsageTray Settings"
+        Width="480"
+        Height="420"
+        WindowStartupLocation="CenterScreen">
+  <ScrollViewer Padding="20">
+    <StackPanel Spacing="12">
+      <TextBlock Text="Refresh interval (seconds)" />
+      <NumericUpDown Minimum="60" Maximum="3600" Value="{Binding RefreshIntervalSeconds}" />
+
+      <CheckBox Content="Enable localhost API (YASB)" IsChecked="{Binding LocalApiEnabled}" />
+      <TextBlock Text="API port" />
+      <NumericUpDown Minimum="1024" Maximum="65535" Value="{Binding LocalApiPort}" />
+
+      <TextBlock Text="OpenCode Go API key (optional override)" />
+      <TextBox Text="{Binding OpenCodeGoApiKey}" PasswordChar="*" />
+
+      <TextBlock Text="Cursor state.vscdb path (optional)" />
+      <TextBox Text="{Binding CursorStateDbPath}" />
+
+      <TextBlock Text="Antigravity state.vscdb path (optional)" />
+      <TextBox Text="{Binding AntigravityStateDbPath}" />
+
+      <Button Content="Save" Command="{Binding SaveCommand}" HorizontalAlignment="Right" />
+      <TextBlock Text="{Binding StatusMessage}" Opacity="0.8" />
+    </StackPanel>
+  </ScrollViewer>
+</Window>
