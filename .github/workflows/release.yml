@@ -20,7 +20,7 @@ jobs:
         with:
           global-json-file: global.json
 
-      - name: Publish Native AOT
+      - name: Publish Native AOT single-file
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
@@ -30,15 +30,22 @@ jobs:
             -p:Version=$ver `
             -o .\publish
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          Move-Item .\publish\aiMonitor.exe ".\aiMonitor-$tag-win-x64.exe"
-          Get-ChildItem .\publish -File | ForEach-Object { "{0}`t{1:N0} KB" -f $_.Name, ($_.Length/1KB) }
+
+          $exe = Get-ChildItem .\publish -Filter *.exe | Select-Object -First 1
+          if (-not $exe) { throw 'Publish produced no exe' }
+          $sidecars = Get-ChildItem .\publish -File | Where-Object { $_.Name -ne $exe.Name }
+          if ($sidecars) {
+            throw ("Expected single exe, leftover: " + ($sidecars.Name -join ', '))
+          }
+
+          $out = ".\aiMonitor-$tag-win-x64.exe"
+          Move-Item $exe.FullName $out
+          "{0:N1} MB" -f ((Get-Item $out).Length / 1MB)
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: |
-            aiMonitor-${{ github.ref_name }}-win-x64.exe
-            publish/*.dll
+          files: aiMonitor-${{ github.ref_name }}-win-x64.exe
           generate_release_notes: true
-          fail_on_unmatched_files: false
+          fail_on_unmatched_files: true
           prerelease: ${{ contains(github.ref_name, '-') }}

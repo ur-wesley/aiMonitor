@@ -63,8 +63,9 @@ public sealed class AntigravityProvider(
 
             if (buckets.Count >= 2)
             {
-                AddRemaining(windows, $"{prefix} 5h", buckets[0]);
-                AddRemaining(windows, $"{prefix} Weekly", buckets[1]);
+                var (fiveHour, weekly) = OrderQuotaBuckets(buckets, isGemini);
+                AddRemaining(windows, $"{prefix} 5h", fiveHour);
+                AddRemaining(windows, $"{prefix} Weekly", weekly);
             }
             else if (buckets.Count == 1)
             {
@@ -77,6 +78,26 @@ public sealed class AntigravityProvider(
 
         return new ProviderUsage(ProviderId, DisplayName, windows, null, DateTimeOffset.UtcNow);
     }
+
+    private static (AntigravityQuotaBucket FiveHour, AntigravityQuotaBucket Weekly) OrderQuotaBuckets(
+        List<AntigravityQuotaBucket> buckets,
+        bool isGemini)
+    {
+        var withReset = buckets
+            .Select(b => (Bucket: b, Reset: ParseReset(b)))
+            .Where(x => x.Reset is not null)
+            .OrderBy(x => x.Reset)
+            .Select(x => x.Bucket)
+            .ToList();
+
+        if (withReset.Count >= 2)
+            return (withReset[0], withReset[1]);
+
+        return isGemini ? (buckets[1], buckets[0]) : (buckets[0], buckets[1]);
+    }
+
+    private static DateTimeOffset? ParseReset(AntigravityQuotaBucket bucket) =>
+        DateTimeOffset.TryParse(bucket.Reset, out var reset) ? reset : null;
 
     private static HttpRequestMessage CreateQuotaRequest(string baseUrl, string token, string? projectId)
     {
@@ -130,8 +151,7 @@ public sealed class AntigravityProvider(
             return;
 
         var remaining = Math.Round(fraction * 100, 1);
-        DateTimeOffset? reset = DateTimeOffset.TryParse(bucket.Reset, out var r) ? r : null;
-        windows.Add(new UsageWindowMetric(label, remaining, true, reset));
+        windows.Add(new UsageWindowMetric(label, remaining, true, ParseReset(bucket)));
     }
 
     private ProviderUsage Failed(string error) =>

@@ -4,6 +4,11 @@ namespace aiMonitor.Services.Auth;
 
 public static class SqliteTokenReader
 {
+    static SqliteTokenReader()
+    {
+        SQLitePCL.Batteries_V2.Init();
+    }
+
     public static async Task<string?> ReadValueAsync(string dbPath, string key, CancellationToken ct = default)
     {
         if (!File.Exists(dbPath))
