@@ -15,6 +15,7 @@
     <EnableTrimAnalyzer>true</EnableTrimAnalyzer>
     <InvariantGlobalization>true</InvariantGlobalization>
     <StripSymbols>true</StripSymbols>
+    <NativeDebugSymbols>false</NativeDebugSymbols>
     <OptimizationPreference>Size</OptimizationPreference>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <DebuggerSupport>false</DebuggerSupport>

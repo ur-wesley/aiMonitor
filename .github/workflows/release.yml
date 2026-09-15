@@ -33,7 +33,10 @@ jobs:
 
           $exe = Get-ChildItem .\publish -Filter *.exe | Select-Object -First 1
           if (-not $exe) { throw 'Publish produced no exe' }
-          $sidecars = Get-ChildItem .\publish -File | Where-Object { $_.Name -ne $exe.Name }
+          Get-ChildItem .\publish -Filter *.pdb -File | Remove-Item -Force
+          $sidecars = Get-ChildItem .\publish -File | Where-Object {
+            $_.Name -ne $exe.Name -and $_.Extension -notin '.pdb'
+          }
           if ($sidecars) {
             throw ("Expected single exe, leftover: " + ($sidecars.Name -join ', '))
           }
