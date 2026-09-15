@@ -1,6 +1,6 @@
 [package]
 name = "aimonitor"
-version = "0.2.0"
+version = "0.3.0"
 description = "Windows tray monitor for AI coding subscription quotas"
 authors = ["urWesley"]
 edition = "2021"
