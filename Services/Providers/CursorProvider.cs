@@ -5,6 +5,7 @@ using Microsoft.Extensions.Options;
 using aiMonitor.Configuration;
 using aiMonitor.Models;
 using aiMonitor.Models.ExternalApi;
+using aiMonitor.Serialization;
 using aiMonitor.Services.Auth;
 
 namespace aiMonitor.Services.Providers;
@@ -46,7 +47,7 @@ public sealed partial class CursorProvider(
             return Failed($"Cursor API error ({(int)response.StatusCode})");
 
         await using var stream = await response.Content.ReadAsStreamAsync(ct).ConfigureAwait(false);
-        var body = await JsonSerializer.DeserializeAsync<CursorUsageSummaryResponse>(stream, cancellationToken: ct)
+        var body = await JsonSerializer.DeserializeAsync(stream, AppJsonContext.Default.CursorUsageSummaryResponse, ct)
             .ConfigureAwait(false);
 
         if (body is null)

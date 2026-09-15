@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using aiMonitor.Configuration;
+using aiMonitor.Serialization;
 using aiMonitor.Services;
 using aiMonitor.Services.Auth;
 using aiMonitor.Services.Providers;
@@ -22,7 +23,7 @@ public static class ExportCommand
 
         var store = host.Services.GetRequiredService<IUsageStore>();
         var dto = YasbExportMapper.ToDto(store.Current);
-        var json = JsonSerializer.Serialize(dto, new JsonSerializerOptions { WriteIndented = false });
+        var json = JsonSerializer.Serialize(dto, AppJsonContext.Default.YasbExportDto);
         Console.WriteLine(json);
         return 0;
     }

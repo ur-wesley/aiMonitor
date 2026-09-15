@@ -20,23 +20,23 @@ jobs:
         with:
           global-json-file: global.json
 
-      - name: Publish single-file
+      - name: Publish Native AOT
         shell: pwsh
         run: |
           $tag = "${{ github.ref_name }}"
           $ver = $tag.TrimStart("v")
-          dotnet publish -c Release -r win-x64 --self-contained `
-            -p:PublishReadyToRun=true `
-            -p:PublishSingleFile=true `
-            -p:IncludeNativeLibrariesForSelfExtract=true `
+          dotnet publish -c Release -r win-x64 `
             -p:Version=$ver `
             -o .\publish
           Move-Item .\publish\aiMonitor.exe ".\aiMonitor-$tag-win-x64.exe"
+          Get-ChildItem .\publish -File | ForEach-Object { "{0}`t{1:N0} KB" -f $_.Name, ($_.Length/1KB) }
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: aiMonitor-${{ github.ref_name }}-win-x64.exe
+          files: |
+            aiMonitor-${{ github.ref_name }}-win-x64.exe
+            publish/*.dll
           generate_release_notes: true
-          fail_on_unmatched_files: true
+          fail_on_unmatched_files: false
           prerelease: ${{ contains(github.ref_name, '-') }}

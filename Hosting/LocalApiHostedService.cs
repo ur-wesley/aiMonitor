@@ -1,12 +1,12 @@
-using System.Text.Json;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using aiMonitor.Configuration;
-using aiMonitor.Models;
+using aiMonitor.Serialization;
 using aiMonitor.Services;
 
 namespace aiMonitor.Hosting;
@@ -27,6 +27,10 @@ public sealed class LocalApiHostedService(
         var port = settings.CurrentValue.LocalApiPort;
         var builder = WebApplication.CreateSlimBuilder();
         builder.WebHost.UseUrls($"http://127.0.0.1:{port}");
+        builder.Services.ConfigureHttpJsonOptions(options =>
+        {
+            options.SerializerOptions.TypeInfoResolverChain.Insert(0, AppJsonContext.Default);
+        });
 
         _app = builder.Build();
         MapRoutes(_app);
@@ -48,7 +52,8 @@ public sealed class LocalApiHostedService(
 
     private void MapRoutes(WebApplication app)
     {
-        app.MapGet("/api/v1/usage", () => Results.Json(YasbExportMapper.ToDto(store.Current)));
+        app.MapGet("/api/v1/usage", () =>
+            Results.Json(YasbExportMapper.ToDto(store.Current), AppJsonContext.Default.YasbExportDto));
 
         app.MapGet("/api/v1/usage/{providerId}", (string providerId) =>
         {
@@ -58,9 +63,10 @@ public sealed class LocalApiHostedService(
             if (provider is null)
                 return Results.NotFound();
 
-            return Results.Json(provider);
+            return Results.Json(provider, AppJsonContext.Default.ProviderUsage);
         });
 
-        app.MapGet("/health", () => Results.Ok(new { status = "ok" }));
+        app.MapGet("/health", () =>
+            Results.Json(new HealthResponse("ok"), AppJsonContext.Default.HealthResponse));
     }
 }

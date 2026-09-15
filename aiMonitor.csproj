@@ -8,6 +8,15 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <RootNamespace>aiMonitor</RootNamespace>
     <AssemblyName>aiMonitor</AssemblyName>
+    <AvaloniaUseCompiledBindingsAsDefault>true</AvaloniaUseCompiledBindingsAsDefault>
+    <PublishAot>true</PublishAot>
+    <IsAotCompatible>true</IsAotCompatible>
+    <EnableAotAnalyzer>true</EnableAotAnalyzer>
+    <EnableTrimAnalyzer>true</EnableTrimAnalyzer>
+    <InvariantGlobalization>false</InvariantGlobalization>
+    <StripSymbols>true</StripSymbols>
+    <OptimizationPreference>Size</OptimizationPreference>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <ItemGroup>
@@ -30,5 +39,12 @@
 
   <ItemGroup>
     <AvaloniaResource Include="Assets\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <DirectPInvoke Include="user32" />
+    <DirectPInvoke Include="advapi32" />
+    <DirectPInvoke Include="crypt32" />
+    <DirectPInvoke Include="e_sqlite3" />
   </ItemGroup>
 </Project>

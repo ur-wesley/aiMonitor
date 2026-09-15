@@ -5,6 +5,7 @@ using Microsoft.Extensions.Options;
 using aiMonitor.Configuration;
 using aiMonitor.Models;
 using aiMonitor.Models.ExternalApi;
+using aiMonitor.Serialization;
 
 namespace aiMonitor.Services.Providers;
 
@@ -34,7 +35,7 @@ public sealed class OpenCodeGoProvider(
             return Failed($"OpenCode API error ({(int)response.StatusCode})");
 
         await using var stream = await response.Content.ReadAsStreamAsync(ct).ConfigureAwait(false);
-        var body = await JsonSerializer.DeserializeAsync<OpenCodeGoUsageResponse>(stream, cancellationToken: ct)
+        var body = await JsonSerializer.DeserializeAsync(stream, AppJsonContext.Default.OpenCodeGoUsageResponse, ct)
             .ConfigureAwait(false);
 
         if (body?.Usage is null)

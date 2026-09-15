@@ -3,6 +3,7 @@ obj/
 .vs/
 agent-tools/
 graphify-out/
+artifacts/
 node_modules/
 *.user
 *.suo

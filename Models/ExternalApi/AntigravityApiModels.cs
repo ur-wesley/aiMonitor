@@ -23,6 +23,18 @@ public sealed class LoadCodeAssistResponse
     public string? CloudAiCompanionProject { get; set; }
 }
 
+public sealed class LoadCodeAssistRequest
+{
+    [JsonPropertyName("metadata")]
+    public LoadCodeAssistMetadata Metadata { get; set; } = new();
+}
+
+public sealed class LoadCodeAssistMetadata
+{
+    [JsonPropertyName("ideType")]
+    public string IdeType { get; set; } = "ANTIGRAVITY";
+}
+
 public sealed class AntigravityAuthStatus
 {
     [JsonPropertyName("apiKey")]

@@ -4,7 +4,7 @@ using Avalonia.Controls;
 
 namespace aiMonitor.Platform;
 
-internal static class WindowPlacement
+internal static partial class WindowPlacement
 {
     private const int Margin = 8;
 
@@ -54,8 +54,9 @@ internal static class WindowPlacement
         return new PixelPoint(workArea.Right - Margin, workArea.Bottom - Margin);
     }
 
-    [DllImport("user32.dll")]
-    private static extern bool GetCursorPos(out Point point);
+    [LibraryImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static partial bool GetCursorPos(out Point point);
 
     [StructLayout(LayoutKind.Sequential)]
     private struct Point

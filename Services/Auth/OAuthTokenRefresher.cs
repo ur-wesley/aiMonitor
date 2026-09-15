@@ -1,7 +1,7 @@
-using System.Net.Http.Json;
 using System.Text.Json;
 using aiMonitor.Configuration;
 using aiMonitor.Models.ExternalApi;
+using aiMonitor.Serialization;
 
 namespace aiMonitor.Services.Auth;
 
@@ -61,7 +61,7 @@ public sealed class OAuthTokenRefresher(IHttpClientFactory httpClientFactory)
     {
         try
         {
-            return JsonSerializer.Deserialize<StoredOAuthToken>(tokenJson)?.Normalize();
+            return JsonSerializer.Deserialize(tokenJson, AppJsonContext.Default.StoredOAuthToken)?.Normalize();
         }
         catch
         {
@@ -93,7 +93,7 @@ public sealed class OAuthTokenRefresher(IHttpClientFactory httpClientFactory)
             if (string.IsNullOrWhiteSpace(json))
                 continue;
 
-            var status = JsonSerializer.Deserialize<AntigravityAuthStatus>(json);
+            var status = JsonSerializer.Deserialize(json, AppJsonContext.Default.AntigravityAuthStatus);
             if (!string.IsNullOrWhiteSpace(status?.ApiKey))
                 return status.ApiKey;
         }
@@ -118,7 +118,8 @@ public sealed class OAuthTokenRefresher(IHttpClientFactory httpClientFactory)
         if (!response.IsSuccessStatusCode)
             return null;
 
-        var body = await response.Content.ReadFromJsonAsync<OAuthTokenResponse>(cancellationToken: ct)
+        await using var stream = await response.Content.ReadAsStreamAsync(ct).ConfigureAwait(false);
+        var body = await JsonSerializer.DeserializeAsync(stream, AppJsonContext.Default.OAuthTokenResponse, ct)
             .ConfigureAwait(false);
 
         return body?.AccessToken;

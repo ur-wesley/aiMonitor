@@ -1,13 +1,12 @@
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
+using aiMonitor.Serialization;
 
 namespace aiMonitor.Configuration;
 
 public sealed class SettingsStore
 {
-    private static readonly JsonSerializerOptions JsonOptions = new() { WriteIndented = true };
-
     public AppSettings Load()
     {
         var path = PathResolver.SettingsFilePath();
@@ -17,7 +16,7 @@ public sealed class SettingsStore
         try
         {
             var json = File.ReadAllText(path);
-            var stored = JsonSerializer.Deserialize<StoredSettings>(json, JsonOptions);
+            var stored = JsonSerializer.Deserialize(json, AppJsonContext.Default.StoredSettingsDto);
             if (stored is null)
                 return new AppSettings();
 
@@ -42,7 +41,7 @@ public sealed class SettingsStore
         var path = PathResolver.SettingsFilePath();
         Directory.CreateDirectory(Path.GetDirectoryName(path)!);
 
-        var stored = new StoredSettings
+        var stored = new StoredSettingsDto
         {
             RefreshIntervalSeconds = settings.RefreshIntervalSeconds,
             LocalApiEnabled = settings.LocalApiEnabled,
@@ -52,7 +51,7 @@ public sealed class SettingsStore
             AntigravityStateDbPath = settings.AntigravityStateDbPath,
         };
 
-        File.WriteAllText(path, JsonSerializer.Serialize(stored, JsonOptions));
+        File.WriteAllText(path, JsonSerializer.Serialize(stored, AppJsonContext.Default.StoredSettingsDto));
     }
 
     private static string? Encrypt(string? plain)
@@ -80,15 +79,5 @@ public sealed class SettingsStore
 
         var plain = ProtectedData.Unprotect(bytes, null, DataProtectionScope.CurrentUser);
         return Encoding.UTF8.GetString(plain);
-    }
-
-    private sealed class StoredSettings
-    {
-        public int RefreshIntervalSeconds { get; set; } = 300;
-        public bool LocalApiEnabled { get; set; } = true;
-        public int LocalApiPort { get; set; } = 6736;
-        public string? EncryptedOpenCodeGoApiKey { get; set; }
-        public string? CursorStateDbPath { get; set; }
-        public string? AntigravityStateDbPath { get; set; }
     }
 }

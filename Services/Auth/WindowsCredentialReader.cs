@@ -3,7 +3,7 @@ using System.Text;
 
 namespace aiMonitor.Services.Auth;
 
-public static class WindowsCredentialReader
+public static partial class WindowsCredentialReader
 {
     private const string ServiceName = "gemini";
     private const string AccountName = "antigravity";
@@ -37,11 +37,12 @@ public static class WindowsCredentialReader
         }
     }
 
-    [DllImport("advapi32", SetLastError = true, CharSet = CharSet.Unicode)]
-    private static extern bool CredRead(string target, CredentialType type, int reservedFlag, out IntPtr credential);
+    [LibraryImport("advapi32", SetLastError = true, StringMarshalling = StringMarshalling.Utf16)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static partial bool CredRead(string target, CredentialType type, int reservedFlag, out IntPtr credential);
 
-    [DllImport("advapi32")]
-    private static extern void CredFree(IntPtr credential);
+    [LibraryImport("advapi32")]
+    private static partial void CredFree(IntPtr credential);
 
     private enum CredentialType : uint
     {

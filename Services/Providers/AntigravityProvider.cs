@@ -4,6 +4,7 @@ using System.Text.Json;
 using aiMonitor.Configuration;
 using aiMonitor.Models;
 using aiMonitor.Models.ExternalApi;
+using aiMonitor.Serialization;
 using aiMonitor.Services.Auth;
 
 namespace aiMonitor.Services.Providers;
@@ -43,7 +44,7 @@ public sealed class AntigravityProvider(
                 continue;
 
             await using var stream = await response.Content.ReadAsStreamAsync(ct).ConfigureAwait(false);
-            body = await JsonSerializer.DeserializeAsync<AntigravityQuotaResponse>(stream, cancellationToken: ct)
+            body = await JsonSerializer.DeserializeAsync(stream, AppJsonContext.Default.AntigravityQuotaResponse, ct)
                 .ConfigureAwait(false);
 
             if (body is not null && body.AllGroups.Any())
@@ -79,12 +80,13 @@ public sealed class AntigravityProvider(
 
     private static HttpRequestMessage CreateQuotaRequest(string baseUrl, string token, string? projectId)
     {
+        var projectBody = string.IsNullOrWhiteSpace(projectId)
+            ? new Dictionary<string, string>()
+            : new Dictionary<string, string> { ["project"] = projectId };
+
         var request = new HttpRequestMessage(HttpMethod.Post, $"{baseUrl}/v1internal:retrieveUserQuotaSummary")
         {
-            Content = JsonContent.Create(
-                string.IsNullOrWhiteSpace(projectId)
-                    ? new Dictionary<string, string>()
-                    : new Dictionary<string, string> { ["project"] = projectId }),
+            Content = JsonContent.Create(projectBody, AppJsonContext.Default.DictionaryStringString),
         };
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
         request.Headers.TryAddWithoutValidation("User-Agent", UserAgent);
@@ -93,13 +95,16 @@ public sealed class AntigravityProvider(
 
     private static async Task<string?> LoadProjectIdAsync(HttpClient client, string token, CancellationToken ct)
     {
-        var payload = new { metadata = new { ideType = "ANTIGRAVITY" } };
+        var payload = new LoadCodeAssistRequest
+        {
+            Metadata = new LoadCodeAssistMetadata { IdeType = "ANTIGRAVITY" },
+        };
 
         foreach (var baseUrl in BaseUrls)
         {
             using var request = new HttpRequestMessage(HttpMethod.Post, $"{baseUrl}/v1internal:loadCodeAssist")
             {
-                Content = JsonContent.Create(payload),
+                Content = JsonContent.Create(payload, AppJsonContext.Default.LoadCodeAssistRequest),
             };
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
             request.Headers.TryAddWithoutValidation("User-Agent", UserAgent);
@@ -108,7 +113,8 @@ public sealed class AntigravityProvider(
             if (!response.IsSuccessStatusCode)
                 continue;
 
-            var body = await response.Content.ReadFromJsonAsync<LoadCodeAssistResponse>(cancellationToken: ct)
+            await using var stream = await response.Content.ReadAsStreamAsync(ct).ConfigureAwait(false);
+            var body = await JsonSerializer.DeserializeAsync(stream, AppJsonContext.Default.LoadCodeAssistResponse, ct)
                 .ConfigureAwait(false);
 
             if (!string.IsNullOrWhiteSpace(body?.CloudAiCompanionProject))
