@@ -18,7 +18,13 @@ public sealed partial class WindowsToast
 
         _onActivated = onActivated;
         SetCurrentProcessExplicitAppUserModelID(AppUserModelId);
-        StartMenuShortcut.Ensure(AppUserModelId, "aiMonitor");
+        try
+        {
+            StartMenuShortcut.Ensure(AppUserModelId, "aiMonitor");
+        }
+        catch
+        {
+        }
     }
 
     public bool TryShow(string title, string body)

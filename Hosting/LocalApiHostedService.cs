@@ -28,7 +28,17 @@ public sealed class LocalApiHostedService(
         var prefix = $"http://127.0.0.1:{port}/";
         _listener = new HttpListener();
         _listener.Prefixes.Add(prefix);
-        _listener.Start();
+
+        try
+        {
+            _listener.Start();
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex, "Local API failed to start on {Prefix}", prefix);
+            _listener = null;
+            return Task.CompletedTask;
+        }
 
         _cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         _loop = Task.Run(() => AcceptLoopAsync(_cts.Token), CancellationToken.None);

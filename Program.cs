@@ -11,6 +11,8 @@ internal static class Program
     [STAThread]
     public static async Task<int> Main(string[] args)
     {
+        StartupDiagnostics.RegisterUnhandledExceptionLogger();
+
         if (args.Length > 0 && string.Equals(args[0], "export", StringComparison.OrdinalIgnoreCase))
             return await ExportCommand.RunAsync(args).ConfigureAwait(false);
 
@@ -19,7 +21,13 @@ internal static class Program
 
         var appVm = host.Services.GetRequiredService<ApplicationViewModel>();
         var toast = host.Services.GetRequiredService<WindowsToast>();
-        toast.Initialize(appVm.ShowUsageWindow);
+        try
+        {
+            toast.Initialize(appVm.ShowUsageWindow);
+        }
+        catch
+        {
+        }
 
         try
         {
