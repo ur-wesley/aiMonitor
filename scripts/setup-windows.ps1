@@ -1,5 +1,5 @@
-# Run from PowerShell: irm https://origin.cursor.com/... OR run locally:
-#   powershell -ExecutionPolicy Bypass -File C:\Arbeit\aiMonitor\scripts\setup-windows.ps1
+# Run from PowerShell:
+#   powershell -ExecutionPolicy Bypass -File .\scripts\setup-windows.ps1
 
 $ErrorActionPreference = "Stop"
 
@@ -18,6 +18,7 @@ if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
 Write-Host ""
 Write-Host "Next: build and run aiMonitor"
-Write-Host "  cd C:\Arbeit\aiMonitor"
-Write-Host "  dotnet publish -c Release -r win-x64 --self-contained -p:PublishReadyToRun=true"
-Write-Host "  .\bin\Release\net10.0\win-x64\publish\aiMonitor.exe"
+Write-Host "  mise install"
+Write-Host "  bun install"
+Write-Host "  bun tauri build"
+Write-Host "  .\src-tauri\target\release\aiMonitor.exe"

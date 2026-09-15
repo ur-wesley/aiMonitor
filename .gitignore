@@ -1,10 +1,15 @@
+node_modules/
+dist/
+.DS_Store
+*.log
+.env
+.env.local
+
+# Rust / Tauri
+src-tauri/target/
+
+# Legacy .NET
 bin/
 obj/
-.vs/
-agent-tools/
-graphify-out/
-artifacts/
-node_modules/
-*.user
-*.suo
-.DS_Store
+publish/
+.dotnet-sdk/
