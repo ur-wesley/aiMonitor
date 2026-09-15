@@ -23,11 +23,13 @@ jobs:
       - name: Publish Native AOT
         shell: pwsh
         run: |
+          $ErrorActionPreference = 'Stop'
           $tag = "${{ github.ref_name }}"
           $ver = $tag.TrimStart("v")
           dotnet publish -c Release -r win-x64 `
             -p:Version=$ver `
             -o .\publish
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           Move-Item .\publish\aiMonitor.exe ".\aiMonitor-$tag-win-x64.exe"
           Get-ChildItem .\publish -File | ForEach-Object { "{0}`t{1:N0} KB" -f $_.Name, ($_.Length/1KB) }
 

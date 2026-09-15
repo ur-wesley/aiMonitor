@@ -45,6 +45,5 @@
     <DirectPInvoke Include="user32" />
     <DirectPInvoke Include="advapi32" />
     <DirectPInvoke Include="crypt32" />
-    <DirectPInvoke Include="e_sqlite3" />
   </ItemGroup>
 </Project>

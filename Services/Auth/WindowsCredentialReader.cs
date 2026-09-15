@@ -37,7 +37,7 @@ public static partial class WindowsCredentialReader
         }
     }
 
-    [LibraryImport("advapi32", SetLastError = true, StringMarshalling = StringMarshalling.Utf16)]
+    [LibraryImport("advapi32", EntryPoint = "CredReadW", SetLastError = true, StringMarshalling = StringMarshalling.Utf16)]
     [return: MarshalAs(UnmanagedType.Bool)]
     private static partial bool CredRead(string target, CredentialType type, int reservedFlag, out IntPtr credential);
 
