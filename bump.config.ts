@@ -1,9 +1,9 @@
-import { defineConfig } from 'bumpp'
+import { defineConfig } from "bumpp";
 
 export default defineConfig({
-  files: ['package.json'],
-  commit: 'chore: release {tag}',
-  tag: 'v{version}',
+  tag: true,
+  commit: true,
   push: true,
-  confirm: true,
-})
+  tagName: "v%s",
+  files: ["package.json", "src-tauri/Cargo.toml", "src-tauri/tauri.conf.json"],
+});
