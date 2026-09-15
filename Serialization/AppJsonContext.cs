@@ -30,6 +30,10 @@ public sealed class StoredSettingsDto
     public string? EncryptedOpenCodeGoApiKey { get; set; }
     public string? CursorStateDbPath { get; set; }
     public string? AntigravityStateDbPath { get; set; }
+
+    public bool StartWithWindows { get; set; }
+
+    public bool LowUsageNotificationsEnabled { get; set; } = true;
 }
 
 public sealed record HealthResponse(string Status);

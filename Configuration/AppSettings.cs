@@ -13,4 +13,8 @@ public sealed class AppSettings
     public string? CursorStateDbPath { get; set; }
 
     public string? AntigravityStateDbPath { get; set; }
+
+    public bool StartWithWindows { get; set; }
+
+    public bool LowUsageNotificationsEnabled { get; set; } = true;
 }

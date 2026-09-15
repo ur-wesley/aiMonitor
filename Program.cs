@@ -1,5 +1,8 @@
 ﻿using Avalonia;
+using Microsoft.Extensions.DependencyInjection;
 using aiMonitor.Hosting;
+using aiMonitor.Platform;
+using aiMonitor.ViewModels;
 
 namespace aiMonitor;
 
@@ -13,6 +16,10 @@ internal static class Program
 
         var host = AppHost.Build(args);
         await host.StartAsync().ConfigureAwait(false);
+
+        var appVm = host.Services.GetRequiredService<ApplicationViewModel>();
+        var toast = host.Services.GetRequiredService<WindowsToast>();
+        toast.Initialize(appVm.ShowUsageWindow);
 
         try
         {

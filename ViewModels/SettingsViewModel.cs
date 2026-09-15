@@ -1,23 +1,27 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using aiMonitor.Configuration;
+using aiMonitor.Platform;
 
 namespace aiMonitor.ViewModels;
 
 public partial class SettingsViewModel : ObservableObject
 {
     private readonly SettingsStore _settingsStore;
+    private readonly AppSettings _appSettings;
 
-    public SettingsViewModel(SettingsStore settingsStore)
+    public SettingsViewModel(SettingsStore settingsStore, AppSettings appSettings)
     {
         _settingsStore = settingsStore;
-        var settings = settingsStore.Load();
-        RefreshIntervalSeconds = settings.RefreshIntervalSeconds;
-        LocalApiEnabled = settings.LocalApiEnabled;
-        LocalApiPort = settings.LocalApiPort;
-        OpenCodeGoApiKey = settings.OpenCodeGoApiKey ?? string.Empty;
-        CursorStateDbPath = settings.CursorStateDbPath ?? string.Empty;
-        AntigravityStateDbPath = settings.AntigravityStateDbPath ?? string.Empty;
+        _appSettings = appSettings;
+        RefreshIntervalSeconds = appSettings.RefreshIntervalSeconds;
+        LocalApiEnabled = appSettings.LocalApiEnabled;
+        LocalApiPort = appSettings.LocalApiPort;
+        OpenCodeGoApiKey = appSettings.OpenCodeGoApiKey ?? string.Empty;
+        CursorStateDbPath = appSettings.CursorStateDbPath ?? string.Empty;
+        AntigravityStateDbPath = appSettings.AntigravityStateDbPath ?? string.Empty;
+        StartWithWindows = AutoStart.IsEnabled();
+        LowUsageNotificationsEnabled = appSettings.LowUsageNotificationsEnabled;
     }
 
     [ObservableProperty]
@@ -39,22 +43,34 @@ public partial class SettingsViewModel : ObservableObject
     private string _antigravityStateDbPath = string.Empty;
 
     [ObservableProperty]
+    private bool _startWithWindows;
+
+    [ObservableProperty]
+    private bool _lowUsageNotificationsEnabled = true;
+
+    [ObservableProperty]
     private string _statusMessage = string.Empty;
 
     [RelayCommand]
     private void Save()
     {
-        var settings = new AppSettings
-        {
-            RefreshIntervalSeconds = Math.Max(60, RefreshIntervalSeconds),
-            LocalApiEnabled = LocalApiEnabled,
-            LocalApiPort = LocalApiPort,
-            OpenCodeGoApiKey = string.IsNullOrWhiteSpace(OpenCodeGoApiKey) ? null : OpenCodeGoApiKey.Trim(),
-            CursorStateDbPath = string.IsNullOrWhiteSpace(CursorStateDbPath) ? null : CursorStateDbPath.Trim(),
-            AntigravityStateDbPath = string.IsNullOrWhiteSpace(AntigravityStateDbPath) ? null : AntigravityStateDbPath.Trim(),
-        };
+        _appSettings.RefreshIntervalSeconds = Math.Max(60, RefreshIntervalSeconds);
+        _appSettings.LocalApiEnabled = LocalApiEnabled;
+        _appSettings.LocalApiPort = LocalApiPort;
+        _appSettings.OpenCodeGoApiKey = string.IsNullOrWhiteSpace(OpenCodeGoApiKey) ? null : OpenCodeGoApiKey.Trim();
+        _appSettings.CursorStateDbPath = string.IsNullOrWhiteSpace(CursorStateDbPath) ? null : CursorStateDbPath.Trim();
+        _appSettings.AntigravityStateDbPath = string.IsNullOrWhiteSpace(AntigravityStateDbPath) ? null : AntigravityStateDbPath.Trim();
+        _appSettings.StartWithWindows = StartWithWindows;
+        _appSettings.LowUsageNotificationsEnabled = LowUsageNotificationsEnabled;
 
-        _settingsStore.Save(settings);
+        _settingsStore.Save(_appSettings);
+
+        if (!AutoStart.SetEnabled(StartWithWindows))
+        {
+            StatusMessage = "Settings saved, but autostart could not be updated.";
+            return;
+        }
+
         StatusMessage = "Saved. Restart aiMonitor for API port changes.";
     }
 }

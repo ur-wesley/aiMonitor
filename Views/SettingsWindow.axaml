@@ -5,12 +5,15 @@
         x:DataType="vm:SettingsViewModel"
         Title="aiMonitor Settings"
         Width="480"
-        Height="420"
+        Height="480"
         WindowStartupLocation="CenterScreen">
   <ScrollViewer Padding="20">
     <StackPanel Spacing="12">
       <TextBlock Text="Refresh interval (seconds)" />
       <NumericUpDown Minimum="60" Maximum="3600" Value="{Binding RefreshIntervalSeconds}" />
+
+      <CheckBox Content="Start with Windows" IsChecked="{Binding StartWithWindows}" />
+      <CheckBox Content="Notify when a window is low (~10%)" IsChecked="{Binding LowUsageNotificationsEnabled}" />
 
       <CheckBox Content="Enable localhost API (YASB)" IsChecked="{Binding LocalApiEnabled}" />
       <TextBlock Text="API port" />

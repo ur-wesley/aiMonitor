@@ -1,6 +1,7 @@
 using System.Windows.Input;
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Threading;
 using Avalonia.Controls.ApplicationLifetimes;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -45,6 +46,17 @@ public partial class ApplicationViewModel : ObservableObject
         if (_usageWindow is { IsVisible: true })
         {
             _usageWindow.Hide();
+            return;
+        }
+
+        ShowUsageWindow();
+    }
+
+    public void ShowUsageWindow()
+    {
+        if (!Dispatcher.UIThread.CheckAccess())
+        {
+            Dispatcher.UIThread.Post(ShowUsageWindow);
             return;
         }
 

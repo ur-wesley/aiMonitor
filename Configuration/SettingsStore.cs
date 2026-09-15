@@ -28,6 +28,8 @@ public sealed class SettingsStore
                 OpenCodeGoApiKey = Decrypt(stored.EncryptedOpenCodeGoApiKey),
                 CursorStateDbPath = stored.CursorStateDbPath,
                 AntigravityStateDbPath = stored.AntigravityStateDbPath,
+                StartWithWindows = stored.StartWithWindows,
+                LowUsageNotificationsEnabled = stored.LowUsageNotificationsEnabled,
             };
         }
         catch
@@ -49,6 +51,8 @@ public sealed class SettingsStore
             EncryptedOpenCodeGoApiKey = Encrypt(settings.OpenCodeGoApiKey),
             CursorStateDbPath = settings.CursorStateDbPath,
             AntigravityStateDbPath = settings.AntigravityStateDbPath,
+            StartWithWindows = settings.StartWithWindows,
+            LowUsageNotificationsEnabled = settings.LowUsageNotificationsEnabled,
         };
 
         File.WriteAllText(path, JsonSerializer.Serialize(stored, AppJsonContext.Default.StoredSettingsDto));
