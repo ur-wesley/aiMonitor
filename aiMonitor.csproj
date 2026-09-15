@@ -52,6 +52,7 @@
     <DirectPInvoke Include="crypt32" />
     <DirectPInvoke Include="shell32" />
     <DirectPInvoke Include="ole32" />
+    <NativeLibrary Include="shell32.lib" />
   </ItemGroup>
 
   <Target Name="RemovePublishSidecars" AfterTargets="Publish">
