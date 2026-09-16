@@ -4,7 +4,8 @@ mod mapper_test;
 use chrono::Local;
 
 use crate::models::{
-    ProviderUsage, UsageSnapshot, YasbAntigravityDto, YasbCursorDto, YasbExportDto, YasbOpenCodeGoDto,
+    ProviderUsage, UsageSnapshot, UsageWindowMetric, YasbAntigravityDto, YasbCursorDto, YasbExportDto,
+    YasbOpenCodeGoDto,
 };
 
 pub fn to_dto(snapshot: &UsageSnapshot) -> YasbExportDto {
@@ -28,7 +29,7 @@ pub fn to_dto(snapshot: &UsageSnapshot) -> YasbExportDto {
         match provider.provider_id.as_str() {
             "cursor" => {
                 map_cursor(provider, &mut dto.cursor);
-                if let Some(total) = dto.cursor.total {
+                if let Some(total) = get_used(provider, "Total") {
                     max_used = max_used.max(total);
                 }
             }
@@ -44,7 +45,7 @@ pub fn to_dto(snapshot: &UsageSnapshot) -> YasbExportDto {
                 map_antigravity(provider, &mut dto.antigravity);
                 for window in &provider.windows {
                     if window.is_remaining_percent {
-                        min_remaining = min_remaining.min(window.value);
+                        min_remaining = min_remaining.min(window.remaining_percent());
                     }
                 }
             }
@@ -71,9 +72,9 @@ fn map_cursor(provider: &ProviderUsage, dto: &mut YasbCursorDto) {
     if provider.error.is_some() {
         return;
     }
-    dto.total = get_value(provider, "Total");
-    dto.auto = get_value(provider, "Auto");
-    dto.api = get_value(provider, "API");
+    dto.total = get_remaining(provider, "Total");
+    dto.auto = get_remaining(provider, "Auto");
+    dto.api = get_remaining(provider, "API");
     dto.resets_at = get_reset(provider).map(|r| {
         r.with_timezone(&Local)
             .format("%m/%d/%Y %I:%M %p")
@@ -86,9 +87,9 @@ fn map_opencode(provider: &ProviderUsage, dto: &mut YasbOpenCodeGoDto) {
     if provider.error.is_some() {
         return;
     }
-    dto.rolling = get_value(provider, "5h");
-    dto.weekly = get_value(provider, "Weekly");
-    dto.monthly = get_value(provider, "Monthly");
+    dto.rolling = get_remaining(provider, "5h");
+    dto.weekly = get_remaining(provider, "Weekly");
+    dto.monthly = get_remaining(provider, "Monthly");
 }
 
 fn map_antigravity(provider: &ProviderUsage, dto: &mut YasbAntigravityDto) {
@@ -96,13 +97,21 @@ fn map_antigravity(provider: &ProviderUsage, dto: &mut YasbAntigravityDto) {
     if provider.error.is_some() {
         return;
     }
-    dto.gemini_5h = get_value(provider, "Gemini 5h");
-    dto.gemini_weekly = get_value(provider, "Gemini Weekly");
-    dto.claude_5h = get_value(provider, "Claude/GPT 5h");
-    dto.claude_weekly = get_value(provider, "Claude/GPT Weekly");
+    dto.gemini_5h = get_remaining(provider, "Gemini 5h");
+    dto.gemini_weekly = get_remaining(provider, "Gemini Weekly");
+    dto.claude_5h = get_remaining(provider, "Claude/GPT 5h");
+    dto.claude_weekly = get_remaining(provider, "Claude/GPT Weekly");
 }
 
-fn get_value(provider: &ProviderUsage, label: &str) -> Option<f64> {
+fn get_remaining(provider: &ProviderUsage, label: &str) -> Option<f64> {
+    provider
+        .windows
+        .iter()
+        .find(|w| w.label.eq_ignore_ascii_case(label))
+        .map(UsageWindowMetric::remaining_percent)
+}
+
+fn get_used(provider: &ProviderUsage, label: &str) -> Option<f64> {
     provider
         .windows
         .iter()
@@ -137,7 +146,7 @@ fn round_numbers(dto: &mut YasbExportDto) {
     dto.antigravity.claude_weekly = dto.antigravity.claude_weekly.map(f64::round);
 }
 
-fn format_used(value: Option<f64>, error: Option<&str>) -> String {
+fn format_remaining(value: Option<f64>, error: Option<&str>) -> String {
     if error.is_some() {
         "—".into()
     } else if let Some(v) = value {
@@ -147,15 +156,11 @@ fn format_used(value: Option<f64>, error: Option<&str>) -> String {
     }
 }
 
-fn format_remaining(value: Option<f64>, error: Option<&str>) -> String {
-    format_used(value, error)
-}
-
 fn build_label(dto: &YasbExportDto) -> String {
     format!(
         "C {} · G {} · AG {}",
-        format_used(dto.cursor.total, dto.cursor.error.as_deref()),
-        format_used(dto.opencode_go.rolling, dto.opencode_go.error.as_deref()),
+        format_remaining(dto.cursor.total, dto.cursor.error.as_deref()),
+        format_remaining(dto.opencode_go.rolling, dto.opencode_go.error.as_deref()),
         format_remaining(dto.antigravity.gemini_5h, dto.antigravity.error.as_deref()),
     )
 }
@@ -166,8 +171,8 @@ fn build_label_alt(dto: &YasbExportDto) -> String {
     } else {
         format!(
             "Cursor {} / auto {}",
-            format_used(dto.cursor.total, None),
-            format_used(dto.cursor.auto, None),
+            format_remaining(dto.cursor.total, None),
+            format_remaining(dto.cursor.auto, None),
         )
     };
 
@@ -176,8 +181,8 @@ fn build_label_alt(dto: &YasbExportDto) -> String {
     } else {
         format!(
             "Go 5h {} / wk {}",
-            format_used(dto.opencode_go.rolling, None),
-            format_used(dto.opencode_go.weekly, None),
+            format_remaining(dto.opencode_go.rolling, None),
+            format_remaining(dto.opencode_go.weekly, None),
         )
     };
 
@@ -200,11 +205,14 @@ fn build_tooltip(dto: &YasbExportDto) -> String {
     if let Some(err) = &dto.cursor.error {
         lines.push(format!("Cursor: {err}"));
     } else {
-        lines.push(format!("Cursor total: {}", format_used(dto.cursor.total, None)));
         lines.push(format!(
-            "Cursor auto: {} · API: {}",
-            format_used(dto.cursor.auto, None),
-            format_used(dto.cursor.api, None),
+            "Cursor total: {} left",
+            format_remaining(dto.cursor.total, None),
+        ));
+        lines.push(format!(
+            "Cursor auto: {} left · API: {} left",
+            format_remaining(dto.cursor.auto, None),
+            format_remaining(dto.cursor.api, None),
         ));
         if let Some(reset) = &dto.cursor.resets_at {
             lines.push(format!("Cursor resets: {reset}"));
@@ -215,13 +223,13 @@ fn build_tooltip(dto: &YasbExportDto) -> String {
         lines.push(format!("OpenCode Go: {err}"));
     } else {
         lines.push(format!(
-            "OpenCode Go 5h: {}",
-            format_used(dto.opencode_go.rolling, None),
+            "OpenCode Go 5h: {} left",
+            format_remaining(dto.opencode_go.rolling, None),
         ));
         lines.push(format!(
-            "OpenCode Go weekly: {} · monthly: {}",
-            format_used(dto.opencode_go.weekly, None),
-            format_used(dto.opencode_go.monthly, None),
+            "OpenCode Go weekly: {} left · monthly: {} left",
+            format_remaining(dto.opencode_go.weekly, None),
+            format_remaining(dto.opencode_go.monthly, None),
         ));
     }
 

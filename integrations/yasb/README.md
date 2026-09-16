@@ -37,3 +37,5 @@ exec_options:
 | `GET /health` | Health check |
 
 Default port: `6736` (Settings).
+
+Percent fields in the full payload (`cursor.total`, `opencode_go.rolling`, `antigravity.gemini_5h`, etc.) are **leftover** quota, not used.

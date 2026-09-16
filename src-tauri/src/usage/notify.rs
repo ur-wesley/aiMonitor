@@ -32,7 +32,7 @@ impl LowUsageNotifier {
             let Some(window) = find_most_depleted(&provider.windows) else {
                 continue;
             };
-            let remaining = remaining_percent(window);
+            let remaining = window.remaining_percent();
             let key = build_key(&provider.provider_id, window);
 
             if remaining > 10.0 {
@@ -57,18 +57,10 @@ fn find_most_depleted(windows: &[UsageWindowMetric]) -> Option<&UsageWindowMetri
     windows
         .iter()
         .min_by(|a, b| {
-            remaining_percent(a)
-                .partial_cmp(&remaining_percent(b))
+            a.remaining_percent()
+                .partial_cmp(&b.remaining_percent())
                 .unwrap_or(std::cmp::Ordering::Equal)
         })
-}
-
-fn remaining_percent(window: &UsageWindowMetric) -> f64 {
-    if window.is_remaining_percent {
-        window.value
-    } else {
-        100.0 - window.value
-    }
 }
 
 fn build_key(provider_id: &str, window: &UsageWindowMetric) -> String {

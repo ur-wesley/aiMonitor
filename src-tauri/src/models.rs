@@ -9,6 +9,16 @@ pub struct UsageWindowMetric {
     pub resets_at: Option<DateTime<Utc>>,
 }
 
+impl UsageWindowMetric {
+    pub fn remaining_percent(&self) -> f64 {
+        if self.is_remaining_percent {
+            self.value
+        } else {
+            100.0 - self.value
+        }
+    }
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ProviderUsage {
     pub provider_id: String,
