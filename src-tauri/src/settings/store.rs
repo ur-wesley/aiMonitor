@@ -8,6 +8,14 @@ use crate::paths::settings_file_path;
 
 use super::dpapi;
 
+const fn default_true() -> bool {
+    true
+}
+
+fn default_label_position() -> String {
+    "beside".to_string()
+}
+
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 struct StoredSettingsDto {
@@ -20,6 +28,22 @@ struct StoredSettingsDto {
     antigravity_state_db_path: Option<String>,
     start_with_windows: bool,
     low_usage_notifications_enabled: bool,
+    #[serde(default)]
+    overlay_enabled: bool,
+    #[serde(default = "default_true")]
+    overlay_always_on_top: bool,
+    #[serde(default = "default_true")]
+    overlay_show_percentage: bool,
+    #[serde(default)]
+    overlay_items: Vec<String>,
+    #[serde(default = "default_true")]
+    overlay_show_labels: bool,
+    #[serde(default = "default_label_position")]
+    overlay_label_position: String,
+    #[serde(default)]
+    overlay_position_x: Option<i32>,
+    #[serde(default)]
+    overlay_position_y: Option<i32>,
 }
 
 pub fn load_settings() -> AppSettings {
@@ -28,10 +52,10 @@ pub fn load_settings() -> AppSettings {
         return AppSettings::default();
     }
 
-    match fs::read_to_string(&path) {
-        Ok(json) => parse_stored(&json).unwrap_or_default(),
-        Err(_) => AppSettings::default(),
-    }
+    fs::read_to_string(&path).map_or_else(
+        |_| AppSettings::default(),
+        |json| parse_stored(&json).unwrap_or_default(),
+    )
 }
 
 fn parse_stored(json: &str) -> Result<AppSettings, String> {
@@ -45,6 +69,14 @@ fn parse_stored(json: &str) -> Result<AppSettings, String> {
         antigravity_state_db_path: stored.antigravity_state_db_path,
         start_with_windows: stored.start_with_windows,
         low_usage_notifications_enabled: stored.low_usage_notifications_enabled,
+        overlay_enabled: stored.overlay_enabled,
+        overlay_always_on_top: stored.overlay_always_on_top,
+        overlay_show_percentage: stored.overlay_show_percentage,
+        overlay_items: stored.overlay_items,
+        overlay_show_labels: stored.overlay_show_labels,
+        overlay_label_position: stored.overlay_label_position,
+        overlay_position_x: stored.overlay_position_x,
+        overlay_position_y: stored.overlay_position_y,
     })
 }
 
@@ -63,6 +95,14 @@ pub fn save_settings(settings: &AppSettings) -> Result<(), String> {
         antigravity_state_db_path: settings.antigravity_state_db_path.clone(),
         start_with_windows: settings.start_with_windows,
         low_usage_notifications_enabled: settings.low_usage_notifications_enabled,
+        overlay_enabled: settings.overlay_enabled,
+        overlay_always_on_top: settings.overlay_always_on_top,
+        overlay_show_percentage: settings.overlay_show_percentage,
+        overlay_items: settings.overlay_items.clone(),
+        overlay_show_labels: settings.overlay_show_labels,
+        overlay_label_position: settings.overlay_label_position.clone(),
+        overlay_position_x: settings.overlay_position_x,
+        overlay_position_y: settings.overlay_position_y,
     };
 
     let json = serde_json::to_string_pretty(&stored).map_err(|e| e.to_string())?;
@@ -72,10 +112,9 @@ pub fn save_settings(settings: &AppSettings) -> Result<(), String> {
 
 fn encrypt_key(plain: Option<&str>) -> Option<String> {
     let plain = plain.filter(|s| !s.is_empty())?;
-    match dpapi::protect(plain.as_bytes()) {
-        Ok(bytes) => Some(STANDARD.encode(bytes)),
-        Err(_) => None,
-    }
+    dpapi::protect(plain.as_bytes())
+        .ok()
+        .map(|bytes| STANDARD.encode(bytes))
 }
 
 fn decrypt_key(encrypted: Option<&String>) -> Option<String> {

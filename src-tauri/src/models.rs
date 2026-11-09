@@ -53,6 +53,14 @@ pub struct AppSettings {
     pub antigravity_state_db_path: Option<String>,
     pub start_with_windows: bool,
     pub low_usage_notifications_enabled: bool,
+    pub overlay_enabled: bool,
+    pub overlay_always_on_top: bool,
+    pub overlay_show_percentage: bool,
+    pub overlay_items: Vec<String>,
+    pub overlay_show_labels: bool,
+    pub overlay_label_position: String,
+    pub overlay_position_x: Option<i32>,
+    pub overlay_position_y: Option<i32>,
 }
 
 impl Default for AppSettings {
@@ -66,6 +74,14 @@ impl Default for AppSettings {
             antigravity_state_db_path: None,
             start_with_windows: false,
             low_usage_notifications_enabled: true,
+            overlay_enabled: false,
+            overlay_always_on_top: true,
+            overlay_show_percentage: true,
+            overlay_items: vec![],
+            overlay_show_labels: true,
+            overlay_label_position: "beside".to_string(),
+            overlay_position_x: None,
+            overlay_position_y: None,
         }
     }
 }

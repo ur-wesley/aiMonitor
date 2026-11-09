@@ -8,12 +8,14 @@ use crate::commands;
 use crate::state::AppState;
 
 pub fn setup_tray(app: &App) -> tauri::Result<()> {
+    let widget_item = MenuItem::with_id(app, "widget", "Toggle Mini Widget", true, None::<&str>)?;
     let refresh_item = MenuItem::with_id(app, "refresh", "Refresh", true, None::<&str>)?;
     let settings_item = MenuItem::with_id(app, "settings", "Settings", true, None::<&str>)?;
     let quit_item = MenuItem::with_id(app, "quit", "Quit", true, None::<&str>)?;
     let menu = Menu::with_items(
         app,
         &[
+            &widget_item,
             &refresh_item,
             &settings_item,
             &PredefinedMenuItem::separator(app)?,
@@ -32,6 +34,12 @@ pub fn setup_tray(app: &App) -> tauri::Result<()> {
         .menu(&menu)
         .on_menu_event(|app, event| {
             match event.id.as_ref() {
+                "widget" => {
+                    let app = app.clone();
+                    tauri::async_runtime::spawn(async move {
+                        let _ = commands::toggle_overlay_window(app);
+                    });
+                }
                 "refresh" => {
                     let app = app.clone();
                     tauri::async_runtime::spawn(async move {
