@@ -1,4 +1,4 @@
-#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
+#![windows_subsystem = "windows"]
 
 #[cfg(windows)]
 fn attach_parent_console() {
@@ -10,9 +10,9 @@ fn attach_parent_console() {
 }
 
 #[cfg(not(windows))]
-fn attach_parent_console() {}
+const fn attach_parent_console() {}
 
-#[cfg(all(windows, not(debug_assertions)))]
+#[cfg(windows)]
 fn detach_console() {
     use windows::Win32::System::Console::FreeConsole;
 
@@ -21,7 +21,7 @@ fn detach_console() {
     }
 }
 
-#[cfg(not(all(windows, not(debug_assertions))))]
+#[cfg(not(windows))]
 const fn detach_console() {}
 
 fn main() {
