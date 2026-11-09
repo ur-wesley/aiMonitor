@@ -11,12 +11,11 @@ pub fn ensure_start_menu_shortcut() {
             return;
         };
 
-        let needs_update = if !shortcut_path.exists() {
-            true
-        } else {
+        let needs_update = if shortcut_path.exists() {
             shortcut_target(&shortcut_path)
-                .map(|target| !paths_equal(&target, &exe))
-                .unwrap_or(true)
+                .is_none_or(|target| !paths_equal(&target, &exe))
+        } else {
+            true
         };
 
         if !needs_update {
@@ -89,3 +88,4 @@ fn create_shortcut(path: &std::path::Path, target: &std::path::Path) -> Result<(
         .map_err(|e| e.to_string())?;
     Ok(())
 }
+

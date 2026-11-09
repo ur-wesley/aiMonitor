@@ -12,17 +12,17 @@ Calm, direct, technical. Short labels. Errors name the provider and what to do (
 
 ## Palette
 
-| Role | Hex |
-| --- | --- |
-| bg | #1E1E1E |
-| surface | #2A2A2A |
-| border | #3A3A3A |
-| fg | #E5E5E5 |
-| muted | #9CA3AF |
-| accent | #3B82F6 |
-| ok | #22C55E |
+| Role       | Hex     |
+| ---------- | ------- |
+| bg         | #1E1E1E |
+| surface    | #2A2A2A |
+| border     | #3A3A3A |
+| fg         | #E5E5E5 |
+| muted      | #9CA3AF |
+| accent     | #3B82F6 |
+| ok         | #22C55E |
 | near-limit | #F59E0B |
-| critical | #F87171 |
+| critical   | #F87171 |
 
 ## Type
 

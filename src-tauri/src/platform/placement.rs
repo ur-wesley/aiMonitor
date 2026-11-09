@@ -32,6 +32,7 @@ pub fn work_area_for_point(
     })
 }
 
+#[allow(clippy::cast_possible_truncation)]
 pub fn cursor_anchor(window: &WebviewWindow) -> Result<(i32, i32), String> {
     let cursor = window.cursor_position().map_err(|e| e.to_string())?;
     Ok((cursor.x.round() as i32, cursor.y.round() as i32))

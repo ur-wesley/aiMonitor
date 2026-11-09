@@ -28,13 +28,13 @@ exec_options:
 
 ## API
 
-| Endpoint | Description |
-|---|---|
-| `GET /api/v1/usage` | Full YASB payload |
-| `GET /api/v1/usage/cursor` | Cursor only |
-| `GET /api/v1/usage/opencode_go` | OpenCode Go only |
-| `GET /api/v1/usage/antigravity` | Antigravity only |
-| `GET /health` | Health check |
+| Endpoint                        | Description       |
+| ------------------------------- | ----------------- |
+| `GET /api/v1/usage`             | Full YASB payload |
+| `GET /api/v1/usage/cursor`      | Cursor only       |
+| `GET /api/v1/usage/opencode_go` | OpenCode Go only  |
+| `GET /api/v1/usage/antigravity` | Antigravity only  |
+| `GET /health`                   | Health check      |
 
 Default port: `6736` (Settings).
 

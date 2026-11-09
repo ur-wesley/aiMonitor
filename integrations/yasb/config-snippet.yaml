@@ -5,7 +5,7 @@ widgets:
   ai_usage:
     type: "yasb.custom.CustomWidget"
     options:
-      label: "<span class=\"c\">C</span> {data[cursor][total]}% · <span class=\"g\">G</span> {data[opencode_go][rolling]}% · <span class=\"a\">AG</span> {data[antigravity][gemini_5h]}%"
+      label: '<span class="c">C</span> {data[cursor][total]}% · <span class="g">G</span> {data[opencode_go][rolling]}% · <span class="a">AG</span> {data[antigravity][gemini_5h]}%'
       label_alt: "{data[label_alt]}"
       label_placeholder: "AI…"
       class_name: "ai-usage-widget"

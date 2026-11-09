@@ -49,11 +49,11 @@ Same JSON as `GET http://127.0.0.1:6736/api/v1/usage`.
 
 ## Provider setup
 
-| Provider | What you need |
-|---|---|
-| **Cursor** | Signed into Cursor (`%APPDATA%\Cursor\...`) |
-| **OpenCode Go** | API key from `/connect` in OpenCode |
-| **Antigravity** | Antigravity CLI or IDE credentials |
+| Provider        | What you need                               |
+| --------------- | ------------------------------------------- |
+| **Cursor**      | Signed into Cursor (`%APPDATA%\Cursor\...`) |
+| **OpenCode Go** | API key from `/connect` in OpenCode         |
+| **Antigravity** | Antigravity CLI or IDE credentials          |
 
 Optional overrides in Settings → custom paths or OpenCode API key.
 

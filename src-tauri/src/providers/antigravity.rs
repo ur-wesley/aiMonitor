@@ -47,16 +47,59 @@ impl Provider for AntigravityProvider {
 
         let mut windows = Vec::new();
         for group in body.all_groups() {
-            let is_gemini = group.name().to_lowercase().contains("gemini");
-            let prefix = if is_gemini { "Gemini" } else { "Claude/GPT" };
+            let group_name = group.name();
+            let is_gemini = group_name.to_lowercase().contains("gemini");
+            let prefix = if is_gemini {
+                "Gemini"
+            } else if group_name.to_lowercase().contains("claude")
+                || group_name.to_lowercase().contains("gpt")
+            {
+                "Claude/GPT"
+            } else {
+                group_name.as_str()
+            };
             let buckets = group.all_buckets();
 
-            if buckets.len() >= 2 {
-                let (five_hour, weekly) = order_quota_buckets(&buckets, is_gemini);
-                add_remaining(&mut windows, format!("{prefix} 5h"), five_hour);
-                add_remaining(&mut windows, format!("{prefix} Weekly"), weekly);
-            } else if buckets.len() == 1 {
-                add_remaining(&mut windows, format!("{prefix} 5h"), buckets[0]);
+            let mut resolved_any = false;
+            for bucket in &buckets {
+                let window_tag = if bucket.window.as_deref() == Some("5h")
+                    || bucket
+                        .bucket_id
+                        .as_deref()
+                        .is_some_and(|id| id.contains("5h"))
+                {
+                    Some("5h")
+                } else if bucket.window.as_deref() == Some("weekly")
+                    || bucket
+                        .bucket_id
+                        .as_deref()
+                        .is_some_and(|id| id.contains("weekly"))
+                {
+                    Some("Weekly")
+                } else if bucket.window.as_deref() == Some("daily")
+                    || bucket
+                        .bucket_id
+                        .as_deref()
+                        .is_some_and(|id| id.contains("daily"))
+                {
+                    Some("Daily")
+                } else {
+                    bucket.window.as_deref().filter(|s| !s.is_empty())
+                };
+                if let Some(tag) = window_tag {
+                    add_remaining(&mut windows, format!("{prefix} {tag}"), bucket);
+                    resolved_any = true;
+                }
+            }
+
+            if !resolved_any {
+                if buckets.len() >= 2 {
+                    let (five_hour, weekly) = order_quota_buckets(&buckets, is_gemini);
+                    add_remaining(&mut windows, format!("{prefix} 5h"), five_hour);
+                    add_remaining(&mut windows, format!("{prefix} Weekly"), weekly);
+                } else if buckets.len() == 1 {
+                    add_remaining(&mut windows, format!("{prefix} 5h"), buckets[0]);
+                }
             }
         }
 
@@ -109,11 +152,12 @@ impl AntigravityProvider {
         None
     }
 
-    async fn load_quota(&self, token: &str, project_id: Option<&str>) -> Result<AntigravityQuotaResponse, String> {
-        let project_body = match project_id {
-            Some(id) => json!({ "project": id }),
-            None => json!({}),
-        };
+    async fn load_quota(
+        &self,
+        token: &str,
+        project_id: Option<&str>,
+    ) -> Result<AntigravityQuotaResponse, String> {
+        let project_body = project_id.map_or_else(|| json!({}), |id| json!({ "project": id }));
 
         for base_url in BASE_URLS {
             let response = self
@@ -123,14 +167,19 @@ impl AntigravityProvider {
                 .header("User-Agent", USER_AGENT)
                 .json(&project_body)
                 .send()
-                .await
-                .map_err(|e| e.to_string())?;
+                .await;
+
+            let Ok(response) = response else {
+                continue;
+            };
 
             if !response.status().is_success() {
                 continue;
             }
 
-            let body: AntigravityQuotaResponse = response.json().await.map_err(|e| e.to_string())?;
+            let Ok(body): Result<AntigravityQuotaResponse, _> = response.json().await else {
+                continue;
+            };
             if !body.all_groups().is_empty() {
                 return Ok(body);
             }
@@ -142,6 +191,7 @@ impl AntigravityProvider {
 
 #[derive(Debug, Deserialize)]
 struct LoadCodeAssistResponse {
+    #[serde(alias = "cloudaicompanionProject")]
     cloudaicompanion_project: Option<String>,
 }
 
@@ -182,7 +232,7 @@ impl AntigravityQuotaGroup {
     fn name(&self) -> String {
         self.display_name
             .clone()
-            .or(self.display_name_snake.clone())
+            .or_else(|| self.display_name_snake.clone())
             .unwrap_or_else(|| "Unknown".into())
     }
 
@@ -206,6 +256,9 @@ struct AntigravityQuotaBucket {
     reset_time: Option<String>,
     #[serde(rename = "reset_time")]
     reset_time_snake: Option<String>,
+    #[serde(rename = "bucketId", alias = "bucket_id")]
+    bucket_id: Option<String>,
+    window: Option<String>,
 }
 
 impl AntigravityQuotaBucket {
@@ -214,7 +267,9 @@ impl AntigravityQuotaBucket {
     }
 
     fn reset(&self) -> Option<String> {
-        self.reset_time.clone().or(self.reset_time_snake.clone())
+        self.reset_time
+            .clone()
+            .or_else(|| self.reset_time_snake.clone())
     }
 }
 
@@ -251,7 +306,11 @@ fn parse_reset(bucket: &AntigravityQuotaBucket) -> Option<DateTime<Utc>> {
         .map(|d| d.with_timezone(&Utc))
 }
 
-fn add_remaining(windows: &mut Vec<UsageWindowMetric>, label: String, bucket: &AntigravityQuotaBucket) {
+fn add_remaining(
+    windows: &mut Vec<UsageWindowMetric>,
+    label: String,
+    bucket: &AntigravityQuotaBucket,
+) {
     if let Some(fraction) = bucket.fraction() {
         let remaining = (fraction * 100.0).round();
         windows.push(UsageWindowMetric {
@@ -260,5 +319,58 @@ fn add_remaining(windows: &mut Vec<UsageWindowMetric>, label: String, bucket: &A
             is_remaining_percent: true,
             resets_at: parse_reset(bucket),
         });
+    }
+}
+
+#[cfg(test)]
+#[allow(clippy::unwrap_used)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn parses_load_code_assist_camel_and_snake() {
+        let camel = "{\"cloudaicompanionProject\":\"test-project-1\"}";
+        let res: LoadCodeAssistResponse = serde_json::from_str(camel).unwrap();
+        assert_eq!(
+            res.cloudaicompanion_project.as_deref(),
+            Some("test-project-1")
+        );
+
+        let snake = "{\"cloudaicompanion_project\":\"test-project-2\"}";
+        let res2: LoadCodeAssistResponse = serde_json::from_str(snake).unwrap();
+        assert_eq!(
+            res2.cloudaicompanion_project.as_deref(),
+            Some("test-project-2")
+        );
+    }
+
+    #[test]
+    fn parses_quota_summary_with_window_and_bucket_id() {
+        let json_data = r#"{
+            "groups": [
+                {
+                    "displayName": "Claude and GPT models",
+                    "buckets": [
+                        {
+                            "bucketId": "3p-weekly",
+                            "window": "weekly",
+                            "remainingFraction": 0.85
+                        },
+                        {
+                            "bucketId": "3p-5h",
+                            "window": "5h",
+                            "remainingFraction": 1.0
+                        }
+                    ]
+                }
+            ]
+        }"#;
+        let quota: AntigravityQuotaResponse = serde_json::from_str(json_data).unwrap();
+        let groups = quota.all_groups();
+        assert_eq!(groups.len(), 1);
+        let buckets = groups[0].all_buckets();
+        assert_eq!(buckets.len(), 2);
+        assert_eq!(buckets[0].bucket_id.as_deref(), Some("3p-weekly"));
+        assert_eq!(buckets[0].window.as_deref(), Some("weekly"));
     }
 }

@@ -22,7 +22,7 @@ fn detach_console() {
 }
 
 #[cfg(not(all(windows, not(debug_assertions))))]
-fn detach_console() {}
+const fn detach_console() {}
 
 fn main() {
     let args: Vec<String> = std::env::args().collect();

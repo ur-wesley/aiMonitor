@@ -13,3 +13,7 @@ bin/
 obj/
 publish/
 .dotnet-sdk/
+
+# Dev tooling & graphify
+.fabrik/
+graphify-out/

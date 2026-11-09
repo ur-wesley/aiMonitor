@@ -47,7 +47,8 @@ impl UsageRefreshService {
         };
         self.store.update(snapshot.clone());
 
-        if let Some(app) = self.app.lock().clone() {
+        let maybe_app = self.app.lock().clone();
+        if let Some(app) = maybe_app {
             let _ = app.emit("usage-updated", &snapshot);
         }
 
@@ -70,3 +71,4 @@ impl UsageRefreshService {
         });
     }
 }
+

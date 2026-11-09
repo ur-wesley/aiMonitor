@@ -11,7 +11,9 @@ pub fn app_data_dir() -> PathBuf {
 }
 
 pub fn crash_log_path() -> PathBuf {
-    dirs_path("LOCALAPPDATA").join("aiMonitor").join("crash.log")
+    dirs_path("LOCALAPPDATA")
+        .join("aiMonitor")
+        .join("crash.log")
 }
 
 fn dirs_path(env: &str) -> PathBuf {
@@ -33,9 +35,28 @@ pub fn opencode_auth_paths() -> Vec<PathBuf> {
     let profile = dirs_path("USERPROFILE");
     let local = dirs_path("LOCALAPPDATA");
     vec![
-        profile.join(".local").join("share").join("opencode").join("auth.json"),
+        profile
+            .join(".local")
+            .join("share")
+            .join("opencode")
+            .join("auth.json"),
+        profile
+            .join(".local")
+            .join("share")
+            .join("opencode")
+            .join("account.json"),
         local.join("opencode").join("auth.json"),
+        local.join("opencode").join("account.json"),
+        profile.join(".config").join("opencode").join("auth.json"),
+        profile
+            .join(".config")
+            .join("opencode")
+            .join("account.json"),
     ]
+}
+
+pub fn cursor_local_state_path() -> PathBuf {
+    dirs_path("APPDATA").join("Cursor").join("Local State")
 }
 
 pub fn gemini_oauth_creds_file() -> PathBuf {

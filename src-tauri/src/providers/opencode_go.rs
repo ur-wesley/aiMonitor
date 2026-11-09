@@ -8,6 +8,8 @@ use crate::paths::opencode_auth_paths;
 
 use super::Provider;
 
+const USER_AGENT: &str = "opencode";
+
 pub struct OpenCodeGoProvider {
     client: Client,
 }
@@ -37,11 +39,23 @@ impl Provider for OpenCodeGoProvider {
         let response = self
             .client
             .get("https://opencode.ai/zen/go/v1/usage")
+            .header("User-Agent", USER_AGENT)
             .bearer_auth(api_key)
             .send()
             .await
             .map_err(|e| e.to_string())?;
 
+        if response.status() == reqwest::StatusCode::UNAUTHORIZED {
+            if let Ok(err_body) = response.text().await {
+                if err_body.contains("api_key_expired") {
+                    return Err(
+                        "OpenCode API key has expired. Please renew it in OpenCode or Settings."
+                            .into(),
+                    );
+                }
+            }
+            return Err("OpenCode API key is invalid or unauthorized".into());
+        }
         if response.status() == reqwest::StatusCode::FORBIDDEN {
             return Err("No Go subscription on this key".into());
         }
@@ -50,7 +64,9 @@ impl Provider for OpenCodeGoProvider {
         }
 
         let body: OpenCodeGoUsageResponse = response.json().await.map_err(|e| e.to_string())?;
-        let usage = body.usage.ok_or_else(|| "Empty OpenCode response".to_string())?;
+        let usage = body
+            .usage
+            .ok_or_else(|| "Empty OpenCode response".to_string())?;
 
         let mut windows = Vec::new();
         add_window(&mut windows, "5h", usage.rolling.as_ref());
@@ -116,8 +132,21 @@ fn read_api_key() -> Option<String> {
         if !path.exists() {
             continue;
         }
-        let contents = std::fs::read_to_string(&path).ok()?;
-        let node: Value = serde_json::from_str(&contents).ok()?;
+        let Ok(contents) = std::fs::read_to_string(&path) else {
+            continue;
+        };
+        let Ok(node): Result<Value, _> = serde_json::from_str(&contents) else {
+            continue;
+        };
+        if let Some(accounts) = node.get("accounts").and_then(|a| a.as_object()) {
+            for (_, acc) in accounts {
+                if acc.get("serviceID").and_then(|s| s.as_str()) == Some("opencode-go") {
+                    if let Some(api_key) = extract_api_key(&acc["credential"]) {
+                        return Some(api_key);
+                    }
+                }
+            }
+        }
         for key in ["opencode-go", "opencode_go", "OpenCode Go", "go"] {
             if let Some(api_key) = extract_api_key(&node[key]) {
                 return Some(api_key);

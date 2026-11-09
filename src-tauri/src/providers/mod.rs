@@ -3,7 +3,7 @@ mod cursor;
 mod opencode_go;
 
 pub use antigravity::AntigravityProvider;
-pub use cursor::CursorProvider;
+pub use cursor::{resolve_cursor_token, CursorProvider};
 pub use opencode_go::OpenCodeGoProvider;
 
 use crate::auth::OAuthTokenRefresher;
@@ -53,5 +53,8 @@ where
 pub trait Provider {
     fn provider_id(&self) -> &'static str;
     fn display_name(&self) -> &'static str;
-    fn fetch(&self, settings: &AppSettings) -> impl std::future::Future<Output = Result<ProviderUsage, String>> + Send;
+    fn fetch(
+        &self,
+        settings: &AppSettings,
+    ) -> impl std::future::Future<Output = Result<ProviderUsage, String>> + Send;
 }

@@ -67,7 +67,8 @@ impl ApiServer {
     }
 
     pub fn stop(&self) {
-        if let Some(tx) = self.shutdown.lock().take() {
+        let maybe_tx = self.shutdown.lock().take();
+        if let Some(tx) = maybe_tx {
             let _ = tx.send(());
         }
     }
@@ -104,8 +105,6 @@ async fn provider_usage(
         .into_iter()
         .find(|p| p.provider_id.eq_ignore_ascii_case(&provider_id));
 
-    match provider {
-        Some(p) => Ok(Json(p)),
-        None => Err(StatusCode::NOT_FOUND),
-    }
+    provider.map_or(Err(StatusCode::NOT_FOUND), |p| Ok(Json(p)))
 }
+
