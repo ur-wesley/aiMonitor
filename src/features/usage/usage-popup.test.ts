@@ -2,10 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import type { ProviderUsage, UsageSnapshot } from "~/types/usage";
 
-function mergeSnapshot(
-  current: UsageSnapshot | null,
-  next: UsageSnapshot,
-): UsageSnapshot {
+function mergeSnapshot(current: UsageSnapshot | null, next: UsageSnapshot): UsageSnapshot {
   return {
     fetched_at: next.fetched_at,
     providers: next.providers,

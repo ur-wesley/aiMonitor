@@ -27,6 +27,14 @@ export type AppSettings = {
   antigravity_state_db_path: string | null;
   start_with_windows: boolean;
   low_usage_notifications_enabled: boolean;
+  overlay_enabled: boolean;
+  overlay_always_on_top: boolean;
+  overlay_show_percentage: boolean;
+  overlay_items: readonly string[];
+  overlay_show_labels: boolean;
+  overlay_label_position: "beside" | "below";
+  overlay_position_x: number | null;
+  overlay_position_y: number | null;
 };
 
 export type CredentialHealth = {

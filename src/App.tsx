@@ -1,6 +1,7 @@
 import { createSignal, onMount, Show } from "solid-js";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 
+import { OverlayWidget } from "~/features/overlay/overlay-widget";
 import { SettingsPanel } from "~/features/settings/settings-panel";
 import { UsagePopup } from "~/features/usage/usage-popup";
 
@@ -20,11 +21,21 @@ export default function App() {
   return (
     <Show when={label()} keyed>
       {(windowLabel) => (
-        <Show when={windowLabel === "usage"} fallback={
-          <Show when={windowLabel === "settings"} fallback={<div />}>
-            <SettingsPanel />
-          </Show>
-        }>
+        <Show
+          when={windowLabel === "usage"}
+          fallback={
+            <Show
+              when={windowLabel === "settings"}
+              fallback={
+                <Show when={windowLabel === "overlay"} fallback={<div />}>
+                  <OverlayWidget />
+                </Show>
+              }
+            >
+              <SettingsPanel />
+            </Show>
+          }
+        >
           <UsagePopup />
         </Show>
       )}

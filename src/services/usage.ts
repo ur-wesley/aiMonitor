@@ -29,8 +29,15 @@ export function saveSettings(
   return ResultAsync.fromPromise(invoke<string>("save_app_settings", { settings }), mapInvokeError);
 }
 
-export function checkCredentials(): ResultAsync<CredentialHealth, { code: string; message: string }> {
+export function checkCredentials(): ResultAsync<
+  CredentialHealth,
+  { code: string; message: string }
+> {
   return ResultAsync.fromPromise(invoke<CredentialHealth>("check_credentials"), mapInvokeError);
+}
+
+export function toggleUsageWindow(): ResultAsync<void, { code: string; message: string }> {
+  return ResultAsync.fromPromise(invoke<void>("toggle_usage_window"), mapInvokeError);
 }
 
 export function hideUsageWindow(): ResultAsync<void, { code: string; message: string }> {
@@ -43,6 +50,32 @@ export function placeUsageWindow(): ResultAsync<void, { code: string; message: s
 
 export function showSettingsWindow(): ResultAsync<void, { code: string; message: string }> {
   return ResultAsync.fromPromise(invoke<void>("show_settings_window"), mapInvokeError);
+}
+
+export function toggleOverlayWindow(): ResultAsync<void, { code: string; message: string }> {
+  return ResultAsync.fromPromise(invoke<void>("toggle_overlay_window"), mapInvokeError);
+}
+
+export function showOverlayWindow(): ResultAsync<void, { code: string; message: string }> {
+  return ResultAsync.fromPromise(invoke<void>("show_overlay_window"), mapInvokeError);
+}
+
+export function hideOverlayWindow(): ResultAsync<void, { code: string; message: string }> {
+  return ResultAsync.fromPromise(invoke<void>("hide_overlay_window"), mapInvokeError);
+}
+
+export function saveOverlayPosition(
+  x: number,
+  y: number,
+): ResultAsync<void, { code: string; message: string }> {
+  return ResultAsync.fromPromise(
+    invoke<void>("save_overlay_position", { x: Math.round(x), y: Math.round(y) }),
+    mapInvokeError,
+  );
+}
+
+export function resetOverlayPosition(): ResultAsync<void, { code: string; message: string }> {
+  return ResultAsync.fromPromise(invoke<void>("reset_overlay_position"), mapInvokeError);
 }
 
 export function quitApp(): ResultAsync<void, { code: string; message: string }> {
